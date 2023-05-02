@@ -21,6 +21,7 @@ from . import mot
 from . import sniper_coco
 
 from .coco import *
+from .oad import *
 from .voc import *
 from .widerface import *
 from .category import *
