@@ -190,9 +190,7 @@ class OADDataSet(DetDataset):
                     gt_pose[i][0] = poseid
                     gt_bbox[i, :] = rbox['rbbox'][:4]
                     gt_rad[i, :] = rbox['rbbox'][4]
-                    # visible remove
-                    gt_keypoint[i, :] = [rbox['keypoints'][idx] for idx in range(len(rbox['keypoints'])) if (idx+1) % 3 != 0 ]
-                    # gt_keypoint[i, :] = rbox['keypoints']
+                    gt_keypoint[i, :] = [rbox['keypoints'][j] for j in range(len(rbox['keypoints'])) if (j+1) % 3 != 0]
                     is_crowd[i][0] = rbox['iscrowd']
                     # check RLE format 
                     if 'segmentation_rbbox' in rbox and rbox['iscrowd'] == 1:
