@@ -139,34 +139,8 @@ class OADDataSet(DetDataset):
                 ins_anno_ids = coco.getAnnIds(
                     imgIds=[img_id], iscrowd=None if self.load_crowd else False)
                 instances = coco.loadAnns(ins_anno_ids)
-
-                bboxes = []
                 rbboxes = []
-                is_rbox_anno = False
-                # for inst in instances:
-                #     # check gt bbox
-                #     if inst.get('ignore', False):
-                #         continue
-                #     if 'bbox' not in inst.keys():
-                #         continue
-                #     else:
-                #         if not any(np.array(inst['bbox'])):
-                #             continue
 
-                #     x1, y1, box_w, box_h = inst['bbox']
-                #     x2 = x1 + box_w
-                #     y2 = y1 + box_h
-                #     eps = 1e-5
-                #     if inst['area'] > 0 and x2 - x1 > eps and y2 - y1 > eps:
-                #         inst['clean_bbox'] = [
-                #             round(float(x), 3) for x in [x1, y1, x2, y2]
-                #         ]
-                #         bboxes.append(inst)
-                #     else:
-                #         logger.warning(
-                #             'Found an invalid bbox in annotations: im_id: {}, '
-                #             'area: {} x1: {}, y1: {}, x2: {}, y2: {}.'.format(
-                #                 img_id, float(inst['area']), x1, y1, x2, y2))
                 for inst in instances:
                     # check gt bbox
                     if inst.get('ignore', False):
@@ -197,8 +171,9 @@ class OADDataSet(DetDataset):
                 elif num_bbox <= 0:
                     is_empty = True
 
-                gt_rbbox = np.zeros((num_bbox, 4), dtype=np.float32)
-                gt_keypoint = np.zeros((num_bbox, 9), dtype=np.float32)
+                gt_bbox = np.zeros((num_bbox, 4), dtype=np.float32)
+                gt_rad = np.zeros((num_bbox, 1), dtype=np.float32)
+                gt_keypoint = np.zeros((num_bbox, 6), dtype=np.float32)
                 gt_class = np.zeros((num_bbox, 1), dtype=np.int32)
                 gt_pose = np.zeros((num_bbox, 1), dtype=np.int32)
                 is_crowd = np.zeros((num_bbox, 1), dtype=np.int32)
@@ -212,8 +187,11 @@ class OADDataSet(DetDataset):
                     poseid = rbox['pose_id']
                     gt_class[i][0] = self.catid2clsid[catid]
                     gt_pose[i][0] = poseid
-                    gt_rbbox[i, :] = rbox['clean_bbox']
-                    gt_keypoint[i, :] = rbox['keypoints']
+                    gt_bbox[i, :] = rbox['rbbox'][:4]
+                    gt_rad[i, :] = rbox['rbbox'][4]
+                    # visible remove
+                    gt_keypoint[i, :] = [rbox['keypoints'][idx] for idx in range(len(rbox['keypoints'])) if (idx+1) % 3 != 0 ]
+                    # gt_keypoint[i, :] = rbox['keypoints']
                     is_crowd[i][0] = rbox['iscrowd']
                     # check RLE format 
                     if 'segmentation_rbbox' in rbox and rbox['iscrowd'] == 1:
@@ -226,7 +204,8 @@ class OADDataSet(DetDataset):
                             gt_poly.pop(i)
                             np.delete(is_crowd, i)
                             np.delete(gt_class, i)
-                            np.delete(gt_rbbox, i)
+                            np.delete(gt_bbox, i)
+                            np.delete(gt_rad, i)
                         else:
                             gt_poly[i] = rbox['segmentation_rbbox']
                         has_segmentation = True
@@ -243,7 +222,8 @@ class OADDataSet(DetDataset):
                     'is_crowd': is_crowd,
                     'gt_class': gt_class,
                     # 'gt_pose': gt_pose,
-                    'gt_rbbox': gt_rbbox,
+                    'gt_bbox': gt_bbox,
+                    'gt_rad': gt_rad,
                     'gt_keypoint': gt_keypoint,
                     # 'gt_poly': gt_poly,
                 }
