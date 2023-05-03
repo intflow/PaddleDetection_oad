@@ -141,18 +141,43 @@ class OADDataSet(DetDataset):
                 instances = coco.loadAnns(ins_anno_ids)
 
                 bboxes = []
+                rbboxes = []
                 is_rbox_anno = False
+                # for inst in instances:
+                #     # check gt bbox
+                #     if inst.get('ignore', False):
+                #         continue
+                #     if 'bbox' not in inst.keys():
+                #         continue
+                #     else:
+                #         if not any(np.array(inst['bbox'])):
+                #             continue
+
+                #     x1, y1, box_w, box_h = inst['bbox']
+                #     x2 = x1 + box_w
+                #     y2 = y1 + box_h
+                #     eps = 1e-5
+                #     if inst['area'] > 0 and x2 - x1 > eps and y2 - y1 > eps:
+                #         inst['clean_bbox'] = [
+                #             round(float(x), 3) for x in [x1, y1, x2, y2]
+                #         ]
+                #         bboxes.append(inst)
+                #     else:
+                #         logger.warning(
+                #             'Found an invalid bbox in annotations: im_id: {}, '
+                #             'area: {} x1: {}, y1: {}, x2: {}, y2: {}.'.format(
+                #                 img_id, float(inst['area']), x1, y1, x2, y2))
                 for inst in instances:
                     # check gt bbox
                     if inst.get('ignore', False):
                         continue
-                    if 'bbox' not in inst.keys():
+                    if 'rbbox' not in inst.keys():
                         continue
                     else:
-                        if not any(np.array(inst['bbox'])):
+                        if not any(np.array(inst['rbbox'])):
                             continue
 
-                    x1, y1, box_w, box_h = inst['bbox']
+                    x1, y1, box_w, box_h,rad = inst['rbbox']
                     x2 = x1 + box_w
                     y2 = y1 + box_h
                     eps = 1e-5
@@ -160,50 +185,54 @@ class OADDataSet(DetDataset):
                         inst['clean_bbox'] = [
                             round(float(x), 3) for x in [x1, y1, x2, y2]
                         ]
-                        bboxes.append(inst)
+                        rbboxes.append(inst)
                     else:
                         logger.warning(
                             'Found an invalid bbox in annotations: im_id: {}, '
-                            'area: {} x1: {}, y1: {}, x2: {}, y2: {}.'.format(
-                                img_id, float(inst['area']), x1, y1, x2, y2))
-
-                num_bbox = len(bboxes)
+                            'area: {} x1: {}, y1: {}, x2: {}, y2: {}, rad:{}.'.format(
+                                img_id, float(inst['area']), x1, y1, x2, y2,rad))
+                num_bbox = len(rbboxes)
                 if num_bbox <= 0 and not self.allow_empty:
                     continue
                 elif num_bbox <= 0:
                     is_empty = True
 
-                gt_bbox = np.zeros((num_bbox, 4), dtype=np.float32)
+                gt_rbbox = np.zeros((num_bbox, 4), dtype=np.float32)
+                gt_keypoint = np.zeros((num_bbox, 9), dtype=np.float32)
                 gt_class = np.zeros((num_bbox, 1), dtype=np.int32)
+                gt_pose = np.zeros((num_bbox, 1), dtype=np.int32)
                 is_crowd = np.zeros((num_bbox, 1), dtype=np.int32)
                 gt_poly = [None] * num_bbox
                 gt_track_id = -np.ones((num_bbox, 1), dtype=np.int32)
 
                 has_segmentation = False
                 has_track_id = False
-                for i, box in enumerate(bboxes):
-                    catid = box['category_id']
+                for i, rbox in enumerate(rbboxes):
+                    catid = rbox['category_id']
+                    poseid = rbox['pose_id']
                     gt_class[i][0] = self.catid2clsid[catid]
-                    gt_bbox[i, :] = box['clean_bbox']
-                    is_crowd[i][0] = box['iscrowd']
+                    gt_pose[i][0] = poseid
+                    gt_rbbox[i, :] = rbox['clean_bbox']
+                    gt_keypoint[i, :] = rbox['keypoints']
+                    is_crowd[i][0] = rbox['iscrowd']
                     # check RLE format 
-                    if 'segmentation' in box and box['iscrowd'] == 1:
+                    if 'segmentation_rbbox' in rbox and rbox['iscrowd'] == 1:
                         gt_poly[i] = [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
-                    elif 'segmentation' in box and box['segmentation']:
+                    elif 'segmentation_rbbox' in rbox and rbox['segmentation_rbbox']:
                         if not np.array(
-                                box['segmentation'],
+                                rbox['segmentation'],
                                 dtype=object).size > 0 and not self.allow_empty:
-                            bboxes.pop(i)
+                            rbboxes.pop(i)
                             gt_poly.pop(i)
                             np.delete(is_crowd, i)
                             np.delete(gt_class, i)
-                            np.delete(gt_bbox, i)
+                            np.delete(gt_rbbox, i)
                         else:
-                            gt_poly[i] = box['segmentation']
+                            gt_poly[i] = rbox['segmentation_rbbox']
                         has_segmentation = True
 
-                    if 'track_id' in box:
-                        gt_track_id[i][0] = box['track_id']
+                    if 'track_id' in rbox:
+                        gt_track_id[i][0] = rbox['track_id']
                         has_track_id = True
 
                 if has_segmentation and not any(
@@ -213,8 +242,10 @@ class OADDataSet(DetDataset):
                 gt_rec = {
                     'is_crowd': is_crowd,
                     'gt_class': gt_class,
-                    'gt_bbox': gt_bbox,
-                    'gt_poly': gt_poly,
+                    # 'gt_pose': gt_pose,
+                    'gt_rbbox': gt_rbbox,
+                    'gt_keypoint': gt_keypoint,
+                    # 'gt_poly': gt_poly,
                 }
                 if has_track_id:
                     gt_rec.update({'gt_track_id': gt_track_id})
