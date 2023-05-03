@@ -155,16 +155,17 @@ class OADDataSet(DetDataset):
                     x2 = x1 + box_w
                     y2 = y1 + box_h
                     eps = 1e-5
-                    if inst['area'] > 0 and x2 - x1 > eps and y2 - y1 > eps:
-                        inst['clean_bbox'] = [
-                            round(float(x), 3) for x in [x1, y1, x2, y2]
-                        ]
-                        rbboxes.append(inst)
-                    else:
-                        logger.warning(
-                            'Found an invalid bbox in annotations: im_id: {}, '
-                            'area: {} x1: {}, y1: {}, x2: {}, y2: {}, rad:{}.'.format(
-                                img_id, float(inst['area']), x1, y1, x2, y2,rad))
+                    rbboxes.append(inst)
+                    # if inst['area'] > 0 and x2 - x1 > eps and y2 - y1 > eps:
+                    #     inst['clean_bbox'] = [
+                    #         round(float(x), 3) for x in [x1, y1, x2, y2]
+                    #     ]
+                    #     rbboxes.append(inst)
+                    # else:
+                    #     logger.warning(
+                    #         'Found an invalid bbox in annotations: im_id: {}, '
+                    #         'area: {} x1: {}, y1: {}, x2: {}, y2: {}, rad:{}.'.format(
+                    #             img_id, float(inst['area']), x1, y1, x2, y2,rad))
                 num_bbox = len(rbboxes)
                 if num_bbox <= 0 and not self.allow_empty:
                     continue
