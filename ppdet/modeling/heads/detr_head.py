@@ -24,7 +24,7 @@ import pycocotools.mask as mask_util
 from ..initializer import linear_init_, constant_
 from ..transformers.utils import inverse_sigmoid
 
-__all__ = ['DETRHead', 'DeformableDETRHead', 'DINOHead', 'MaskDINOHead', 'DINOoadHEAD']
+__all__ = ['DETRHead', 'DeformableDETRHead', 'DINOHead', 'MaskDINOHead', 'DINOHEAD_oad']
 
 
 class MLP(nn.Layer):
@@ -533,19 +533,19 @@ class MaskDINOHead(nn.Layer):
             return (dec_out_bboxes[-1], dec_out_logits[-1], dec_out_masks[-1])
 
 @register
-class DINOoadHEAD(nn.Layer):
+class DINOHEAD_oad(nn.Layer):
     __inject__ = ['loss']
 
-    def __init__(self, loss='DINOLoss'):
-        super(DINOoadHEAD, self).__init__()
+    def __init__(self, loss='DINOLoss_oad'):
+        super(DINOHEAD_oad, self).__init__()
         self.loss = loss
 
     def forward(self, out_transformer, body_feats, inputs=None):
-        (dec_out_bboxes, dec_out_logits, enc_topk_bboxes, enc_topk_logits,
+        (dec_out_bboxes, dec_out_radian, dec_out_logits, enc_topk_bboxes, enc_topk_radian, enc_topk_logits,
          dn_meta) = out_transformer
         if self.training:
             assert inputs is not None
-            assert 'gt_bbox' in inputs and 'gt_class' in inputs
+            assert 'gt_bbox' in inputs and 'gt_class' in inputs and 'gt_rad' in inputs
 
             if dn_meta is not None:
                 if isinstance(dn_meta, list):
@@ -607,20 +607,26 @@ class DINOoadHEAD(nn.Layer):
                 else:
                     dn_out_bboxes, dec_out_bboxes = paddle.split(
                         dec_out_bboxes, dn_meta['dn_num_split'], axis=2)
+                    dn_out_radian, dec_out_radian = paddle.split(
+                        dec_out_radian, dn_meta['dn_num_split'], axis=2)
                     dn_out_logits, dec_out_logits = paddle.split(
                         dec_out_logits, dn_meta['dn_num_split'], axis=2)
             else:
-                dn_out_bboxes, dn_out_logits = None, None
+                dn_out_bboxes, dn_out_radian, dn_out_logits = None, None, None
 
             out_bboxes = paddle.concat(
                 [enc_topk_bboxes.unsqueeze(0), dec_out_bboxes])
+            out_radian = paddle.concat(
+                [enc_topk_radian.unsqueeze(0), dec_out_radian])
             out_logits = paddle.concat(
                 [enc_topk_logits.unsqueeze(0), dec_out_logits])
 
             return self.loss(
                 out_bboxes,
+                out_radian,
                 out_logits,
                 inputs['gt_bbox'],
+                inputs['gt_rad'],
                 inputs['gt_class'],
                 dn_out_bboxes=dn_out_bboxes,
                 dn_out_logits=dn_out_logits,

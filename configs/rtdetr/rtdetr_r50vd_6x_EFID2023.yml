@@ -6,9 +6,36 @@ _BASE_: [
   '_base_/rtdetr_reader.yml',
 ]
 
+architecture: DETR
 weights: output/rtdetr_r50vd_6x_EFID2023/model_final
 find_unused_parameters: True
 log_iter: 200
 
 DETR:
-  detr_head: DINOoadHEAD
+  transformer: RTDETRTransformer_oad
+  detr_head: DINOHEAD_oad
+
+RTDETRTransformer_oad:
+  num_queries: 300
+  position_embed_type: sine
+  feat_strides: [8, 16, 32]
+  num_levels: 3
+  nhead: 8
+  num_decoder_layers: 6
+  dim_feedforward: 1024
+  dropout: 0.0
+  activation: relu
+  num_denoising: 100
+  label_noise_ratio: 0.5
+  box_noise_scale: 1.0
+  learnt_init_query: False
+
+DINOHEAD_oad:
+  loss:
+    name: DINOLoss_oad
+    loss_coeff: {class: 1, bbox: 5, giou: 2}
+    aux_loss: True
+    use_vfl: True
+    matcher:
+      name: HungarianMatcher_oad
+      matcher_coeff: {class: 2, bbox: 5, giou: 2, radian: 1}

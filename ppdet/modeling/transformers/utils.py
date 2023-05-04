@@ -221,7 +221,8 @@ def get_contrastive_denoising_training_group(targets,
                                              class_embed,
                                              num_denoising=100,
                                              label_noise_ratio=0.5,
-                                             box_noise_scale=1.0):
+                                             box_noise_scale=1.0,
+                                             active_radian=False):
     if num_denoising <= 0:
         return None, None, None, None
     num_gts = [len(t) for t in targets["gt_class"]]
@@ -236,16 +237,22 @@ def get_contrastive_denoising_training_group(targets,
     input_query_class = paddle.full(
         [bs, max_gt_num], num_classes, dtype='int32')
     input_query_bbox = paddle.zeros([bs, max_gt_num, 4])
+    if active_radian:
+        input_query_radian = paddle.zeros([bs, max_gt_num, 1])
     pad_gt_mask = paddle.zeros([bs, max_gt_num])
     for i in range(bs):
         num_gt = num_gts[i]
         if num_gt > 0:
             input_query_class[i, :num_gt] = targets["gt_class"][i].squeeze(-1)
             input_query_bbox[i, :num_gt] = targets["gt_bbox"][i]
+            if active_radian:
+                input_query_radian[i, :num_gt] = targets["gt_rad"][i]
             pad_gt_mask[i, :num_gt] = 1
     # each group has positive and negative queries.
     input_query_class = input_query_class.tile([1, 2 * num_group])
     input_query_bbox = input_query_bbox.tile([1, 2 * num_group, 1])
+    if active_radian:
+        input_query_radian = input_query_radian.tile([1, 2 * num_group, 1])
     pad_gt_mask = pad_gt_mask.tile([1, 2 * num_group])
     # positive and negative mask
     negative_gt_mask = paddle.zeros([bs, max_gt_num * 2, 1])
@@ -288,6 +295,8 @@ def get_contrastive_denoising_training_group(targets,
         known_bbox.clip_(min=0.0, max=1.0)
         input_query_bbox = bbox_xyxy_to_cxcywh(known_bbox)
         input_query_bbox = inverse_sigmoid(input_query_bbox)
+        
+    # FIXME : random으로 radian denoise 하는 방법 구현?
 
     class_embed = paddle.concat(
         [class_embed, paddle.zeros([1, class_embed.shape[-1]])])
@@ -318,8 +327,10 @@ def get_contrastive_denoising_training_group(targets,
         "dn_num_group": num_group,
         "dn_num_split": [num_denoising, num_queries]
     }
-
-    return input_query_class, input_query_bbox, attn_mask, dn_meta
+    if active_radian:
+        return input_query_class, input_query_bbox, input_query_radian, attn_mask, dn_meta
+    else:
+        return input_query_class, input_query_bbox, attn_mask, dn_meta
 
 
 def get_sine_pos_embed(pos_tensor,
