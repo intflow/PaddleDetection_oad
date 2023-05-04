@@ -81,7 +81,6 @@ class OADDataSet(DetDataset):
             int(num * self.empty_ratio / (1 - self.empty_ratio)), len(records))
         records = random.sample(records, sample_num)
         return records
-
     def parse_dataset(self):
         anno_path = os.path.join(self.dataset_dir, self.anno_path)
         image_dir = os.path.join(self.dataset_dir, self.image_dir)
@@ -96,13 +95,20 @@ class OADDataSet(DetDataset):
         records = []
         empty_records = []
         ct = 0
-
-        self.catid2clsid = dict({catid: i for i, catid in enumerate(cat_ids)})
-        self.cname2cid = dict({
-            coco.loadCats(catid)[0]['name']: clsid
-            for catid, clsid in self.catid2clsid.items()
-        })
-
+    
+        # self.catid2clsid = dict({catid: i for i, catid in enumerate(cat_ids)})
+        # self.cname2cid = dict({
+        #     coco.loadCats(catid)[0]['name']: clsid
+        #     for catid, clsid in self.catid2clsid.items()
+        # })
+        cls_dict = {cls['name']: cls['id'] for cls in coco.dataset['categories']}
+        cls_list_new = [{cls_key: cls_value} for cls_key, cls_value in cls_dict.items()]
+        pose_dict = {pose['name']: pose['id'] for pose in coco.dataset['poses']}
+        pose_list_new = [{pose_key: pose_value} for pose_key, pose_value in pose_dict.items()]
+        combined_dict = {class_key + '_' + pose_key: (len(pose_list_new) * class_value) + pose_value for class_item in cls_list_new for pose_item in pose_list_new for (class_key, class_value), (pose_key, pose_value) in zip(class_item.items(), pose_item.items())}
+        self.cname2cid=combined_dict
+        self.catid2clsid=dict({catid: i for i, catid in enumerate(combined_dict.values())})
+        self.pose_num=len(pose_list_new)
         if 'annotations' not in coco.dataset:
             self.load_image_only = True
             logger.warning('Annotation file: {} does not contains ground truth '
@@ -212,8 +218,9 @@ class OADDataSet(DetDataset):
                 for i, rbox in enumerate(rbboxes):
                     catid = rbox['category_id']
                     poseid = rbox['pose_id']
-                    gt_class[i][0] = self.catid2clsid[catid]
                     gt_pose[i][0] = poseid
+                    class_pose_id=self.pose_num*catid+poseid
+                    gt_class[i][0] = self.catid2clsid[class_pose_id]
                     gt_bbox[i, :] = rbox['rbbox'][:4]
                     gt_rad[i, :] = rbox['rbbox'][4]
                     gt_keypoint[i, :] = [rbox['keypoints'][j] for j in range(len(rbox['keypoints'])) if (j+1) % 3 != 0]
