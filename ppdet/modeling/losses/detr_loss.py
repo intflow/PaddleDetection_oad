@@ -585,11 +585,12 @@ class DETRLoss_oad(nn.Layer):
 
     def __init__(self,
                  num_classes=80,
-                 matcher='HungarianMatcher',
+                 matcher='HungarianMatcher_oad',
                  loss_coeff={
                      'class': 1,
                      'bbox': 5,
                      'giou': 2,
+                     'rads': 1,
                      'no_object': 0.1,
                      'mask': 1,
                      'dice': 1
@@ -688,6 +689,24 @@ class DETRLoss_oad(nn.Layer):
         loss[name_giou] = self.loss_coeff['giou'] * loss[name_giou]
         return loss
 
+    def _get_loss_rad(self, rads, gt_rad, match_indices, num_gts,
+                       postfix=""):
+        # rads: [b, query, 1], gt_rad: list[[n, 1]]
+        name_rad = "loss_rad" + postfix
+
+        loss = dict()
+        if sum(len(a) for a in gt_rad) == 0:
+            loss[name_rad] = paddle.to_tensor([0.])
+            return loss
+
+        src_rad, target_rad = self._get_src_target_assign(rads, gt_rad,
+                                                            match_indices)
+        src_rad = paddle.tanh(src_rad) * 0.78539
+        loss[name_rad] = self.loss_coeff['rad'] * \
+        (F.smooth_l1_loss(paddle.cos(src_rad), paddle.cos(target_rad), reduction='sum') +
+         F.smooth_l1_loss(paddle.sin(src_rad), paddle.sin(target_rad), reduction='sum')) / num_gts
+        return loss
+    
     def _get_loss_mask(self, masks, gt_mask, match_indices, num_gts,
                        postfix=""):
         # masks: [b, query, h, w], gt_mask: list[[n, H, W]]
@@ -726,8 +745,10 @@ class DETRLoss_oad(nn.Layer):
 
     def _get_loss_aux(self,
                       boxes,
+                      rads,
                       logits,
                       gt_bbox,
+                      gt_rad,
                       gt_class,
                       bg_index,
                       num_gts,
@@ -737,24 +758,29 @@ class DETRLoss_oad(nn.Layer):
                       gt_mask=None):
         loss_class = []
         loss_bbox, loss_giou = [], []
+        loss_rad = []
         loss_mask, loss_dice = [], []
         if dn_match_indices is not None:
             match_indices = dn_match_indices
         elif self.use_uni_match:
             match_indices = self.matcher(
                 boxes[self.uni_match_ind],
+                rads[self.uni_match_ind],
                 logits[self.uni_match_ind],
                 gt_bbox,
+                gt_rad,
                 gt_class,
                 masks=masks[self.uni_match_ind] if masks is not None else None,
                 gt_mask=gt_mask)
-        for i, (aux_boxes, aux_logits) in enumerate(zip(boxes, logits)):
+        for i, (aux_boxes, aux_rads, aux_logits) in enumerate(zip(boxes, rads, logits)):
             aux_masks = masks[i] if masks is not None else None
             if not self.use_uni_match and dn_match_indices is None:
                 match_indices = self.matcher(
                     aux_boxes,
+                    aux_rads,
                     aux_logits,
                     gt_bbox,
+                    gt_rad,
                     gt_class,
                     masks=aux_masks,
                     gt_mask=gt_mask)
@@ -762,6 +788,7 @@ class DETRLoss_oad(nn.Layer):
                 if sum(len(a) for a in gt_bbox) > 0:
                     src_bbox, target_bbox = self._get_src_target_assign(
                         aux_boxes.detach(), gt_bbox, match_indices)
+                    # FIXME: Consider using GWD instead of bbox iou to use radian
                     iou_score = bbox_iou(
                         bbox_cxcywh_to_xyxy(src_bbox).split(4, -1),
                         bbox_cxcywh_to_xyxy(target_bbox).split(4, -1))
@@ -777,6 +804,10 @@ class DETRLoss_oad(nn.Layer):
                                         num_gts, postfix)
             loss_bbox.append(loss_['loss_bbox' + postfix])
             loss_giou.append(loss_['loss_giou' + postfix])
+            loss_rad.append(
+                self._get_loss_rad(aux_rads, gt_rad, match_indices,
+                                    num_gts, postfix)[
+                                         'loss_rad' + postfix])
             if masks is not None and gt_mask is not None:
                 loss_ = self._get_loss_mask(aux_masks, gt_mask, match_indices,
                                             num_gts, postfix)
@@ -785,7 +816,8 @@ class DETRLoss_oad(nn.Layer):
         loss = {
             "loss_class_aux" + postfix: paddle.add_n(loss_class),
             "loss_bbox_aux" + postfix: paddle.add_n(loss_bbox),
-            "loss_giou_aux" + postfix: paddle.add_n(loss_giou)
+            "loss_giou_aux" + postfix: paddle.add_n(loss_giou),
+            "loss_rad_aux" + postfix: paddle.add_n(loss_rad)
         }
         if masks is not None and gt_mask is not None:
             loss["loss_mask_aux" + postfix] = paddle.add_n(loss_mask)
@@ -828,10 +860,10 @@ class DETRLoss_oad(nn.Layer):
 
     def _get_prediction_loss(self,
                              boxes,
-                             radian,
+                             rads,
                              logits,
                              gt_bbox,
-                             gt_radian,
+                             gt_rad,
                              gt_class,
                              masks=None,
                              gt_mask=None,
@@ -840,7 +872,7 @@ class DETRLoss_oad(nn.Layer):
                              num_gts=1):
         if dn_match_indices is None:
             match_indices = self.matcher(
-                boxes, radian, logits, gt_bbox, gt_radian, gt_class, masks=masks, gt_mask=gt_mask)
+                boxes, rads, logits, gt_bbox, gt_rad, gt_class, masks=masks, gt_mask=gt_mask)
         else:
             match_indices = dn_match_indices
 
@@ -848,6 +880,7 @@ class DETRLoss_oad(nn.Layer):
             if sum(len(a) for a in gt_bbox) > 0:
                 src_bbox, target_bbox = self._get_src_target_assign(
                     boxes.detach(), gt_bbox, match_indices)
+                # FIXME: Consider using GWD instead of bbox iou to use radian
                 iou_score = bbox_iou(
                     bbox_cxcywh_to_xyxy(src_bbox).split(4, -1),
                     bbox_cxcywh_to_xyxy(target_bbox).split(4, -1))
@@ -863,6 +896,9 @@ class DETRLoss_oad(nn.Layer):
         loss.update(
             self._get_loss_bbox(boxes, gt_bbox, match_indices, num_gts,
                                 postfix))
+        loss.update(
+            self._get_loss_rad(rads, gt_rad, match_indices, num_gts,
+                                postfix))
         if masks is not None and gt_mask is not None:
             loss.update(
                 self._get_loss_mask(masks, gt_mask, match_indices, num_gts,
@@ -871,10 +907,10 @@ class DETRLoss_oad(nn.Layer):
 
     def forward(self,
                 boxes,
-                radian,
+                rads,
                 logits,
                 gt_bbox,
-                gt_radian,
+                gt_rad,
                 gt_class,
                 masks=None,
                 gt_mask=None,
@@ -898,10 +934,10 @@ class DETRLoss_oad(nn.Layer):
 
         total_loss = self._get_prediction_loss(
             boxes[-1],
-            radian[-1],
+            rads[-1],
             logits[-1],
             gt_bbox,
-            gt_radian,
+            gt_rad,
             gt_class,
             masks=masks[-1] if masks is not None else None,
             gt_mask=gt_mask,
@@ -913,8 +949,10 @@ class DETRLoss_oad(nn.Layer):
             total_loss.update(
                 self._get_loss_aux(
                     boxes[:-1],
+                    rads[:-1],
                     logits[:-1],
                     gt_bbox,
+                    gt_rad,
                     gt_class,
                     self.num_classes,
                     num_gts,
@@ -929,21 +967,22 @@ class DETRLoss_oad(nn.Layer):
 class DINOLoss_oad(DETRLoss_oad):
     def forward(self,
                 boxes,
-                radian,
+                rads,
                 logits,
                 gt_bbox,
-                gt_radian,
+                gt_rad,
                 gt_class,
                 masks=None,
                 gt_mask=None,
                 postfix="",
                 dn_out_bboxes=None,
+                dn_out_rads=None,
                 dn_out_logits=None,
                 dn_meta=None,
                 **kwargs):
         num_gts = self._get_num_gts(gt_class)
         total_loss = super(DINOLoss_oad, self).forward(
-            boxes, radian, logits, gt_bbox, gt_radian, gt_class, num_gts=num_gts)
+            boxes, rads, logits, gt_bbox, gt_rad, gt_class, num_gts=num_gts)
 
         if dn_meta is not None:
             dn_positive_idx, dn_num_group = \
@@ -958,8 +997,10 @@ class DINOLoss_oad(DETRLoss_oad):
             num_gts *= dn_num_group
             dn_loss = super(DINOLoss_oad, self).forward(
                 dn_out_bboxes,
+                dn_out_rads,
                 dn_out_logits,
                 gt_bbox,
+                gt_rad,
                 gt_class,
                 postfix="_dn",
                 dn_match_indices=dn_match_indices,

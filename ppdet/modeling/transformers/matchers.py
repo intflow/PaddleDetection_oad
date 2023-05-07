@@ -196,7 +196,7 @@ class HungarianMatcher_oad(nn.Layer):
                      'giou': 2,
                      'mask': 1,
                      'dice': 1,
-                     'radian': 1
+                     'rad': 1
                  },
                  use_focal_loss=False,
                  with_mask=False,
@@ -220,10 +220,10 @@ class HungarianMatcher_oad(nn.Layer):
 
     def forward(self,
                 boxes,
-                radian,
+                rads,
                 logits,
                 gt_bbox,
-                gt_radian,
+                gt_rad,
                 gt_class,
                 masks=None,
                 gt_mask=None):
@@ -259,12 +259,12 @@ class HungarianMatcher_oad(nn.Layer):
             0, 1)) if self.use_focal_loss else F.softmax(logits.flatten(0, 1))
         # [batch_size * num_queries, 4]
         out_bbox = boxes.detach().flatten(0, 1)
-        out_radian = radian.detach().flatten(0, 1)
+        out_radian = rads.detach().flatten(0, 1)
 
         # Also concat the target labels and boxes
         tgt_ids = paddle.concat(gt_class).flatten()
         tgt_bbox = paddle.concat(gt_bbox)
-        tgt_radian = paddle.concat(gt_radian)
+        tgt_radian = paddle.concat(gt_rad)
 
         # Compute the classification cost
         out_prob = paddle.gather(out_prob, tgt_ids, axis=1)
@@ -295,7 +295,7 @@ class HungarianMatcher_oad(nn.Layer):
         C = self.matcher_coeff['class'] * cost_class + \
             self.matcher_coeff['bbox'] * cost_bbox + \
             self.matcher_coeff['giou'] * cost_giou + \
-            self.matcher_coeff['radian'] * cost_radian.squeeze()
+            self.matcher_coeff['rad'] * cost_radian.squeeze()
         # Compute the mask cost and dice cost
         if self.with_mask:
             assert (masks is not None and gt_mask is not None,

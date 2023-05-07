@@ -238,7 +238,7 @@ def get_contrastive_denoising_training_group(targets,
         [bs, max_gt_num], num_classes, dtype='int32')
     input_query_bbox = paddle.zeros([bs, max_gt_num, 4])
     if active_radian:
-        input_query_radian = paddle.zeros([bs, max_gt_num, 1])
+        input_query_rad = paddle.zeros([bs, max_gt_num, 1])
     pad_gt_mask = paddle.zeros([bs, max_gt_num])
     for i in range(bs):
         num_gt = num_gts[i]
@@ -246,13 +246,13 @@ def get_contrastive_denoising_training_group(targets,
             input_query_class[i, :num_gt] = targets["gt_class"][i].squeeze(-1)
             input_query_bbox[i, :num_gt] = targets["gt_bbox"][i]
             if active_radian:
-                input_query_radian[i, :num_gt] = targets["gt_rad"][i]
+                input_query_rad[i, :num_gt] = targets["gt_rad"][i]
             pad_gt_mask[i, :num_gt] = 1
     # each group has positive and negative queries.
     input_query_class = input_query_class.tile([1, 2 * num_group])
     input_query_bbox = input_query_bbox.tile([1, 2 * num_group, 1])
     if active_radian:
-        input_query_radian = input_query_radian.tile([1, 2 * num_group, 1])
+        input_query_rad = input_query_rad.tile([1, 2 * num_group, 1])
     pad_gt_mask = pad_gt_mask.tile([1, 2 * num_group])
     # positive and negative mask
     negative_gt_mask = paddle.zeros([bs, max_gt_num * 2, 1])
@@ -296,7 +296,13 @@ def get_contrastive_denoising_training_group(targets,
         input_query_bbox = bbox_xyxy_to_cxcywh(known_bbox)
         input_query_bbox = inverse_sigmoid(input_query_bbox)
         
-    # FIXME : random으로 radian denoise 하는 방법 구현?
+        # FIXME : Denoising 전략: 딱 하나의 정답이 아닌 적당한 noisy GT를 디코더에 입력하고 모델이 진짜 GT를 복원하도록 학습함
+        #We show that the slow convergence results from the instability of bipartite graph matching which causes inconsistent optimization goals in early training stages. To address this issue, except for the Hungarian loss, our method additionally feeds ground-truth bounding boxes with noises into Transformer decoder and trains the model to reconstruct the original boxes, which effectively reduces the bipartite graph matching difficulty and leads to a faster convergence.
+        #https://dhpark1212.tistory.com/entry/%EC%9D%B4%EB%B6%84-%EA%B7%B8%EB%9E%98%ED%94%84-vs-%EC%9D%B4%EB%B6%84-%EB%A7%A4%EC%B9%AD
+        if active_radian:
+            rand_rad = (paddle.rand(input_query_rad.shape) * 2.0 - 1.0) * 0.78539 * box_noise_scale * 0.05
+            input_query_rad += rand_rad
+        
 
     class_embed = paddle.concat(
         [class_embed, paddle.zeros([1, class_embed.shape[-1]])])
@@ -328,7 +334,7 @@ def get_contrastive_denoising_training_group(targets,
         "dn_num_split": [num_denoising, num_queries]
     }
     if active_radian:
-        return input_query_class, input_query_bbox, input_query_radian, attn_mask, dn_meta
+        return input_query_class, input_query_bbox, input_query_rad, attn_mask, dn_meta
     else:
         return input_query_class, input_query_bbox, attn_mask, dn_meta
 

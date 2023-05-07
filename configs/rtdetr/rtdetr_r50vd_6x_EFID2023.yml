@@ -33,9 +33,9 @@ RTDETRTransformer_oad:
 DINOHEAD_oad:
   loss:
     name: DINOLoss_oad
-    loss_coeff: {class: 1, bbox: 5, giou: 2}
+    loss_coeff: {class: 1, bbox: 5, giou: 2, rad: 1}
     aux_loss: True
     use_vfl: True
     matcher:
       name: HungarianMatcher_oad
-      matcher_coeff: {class: 2, bbox: 5, giou: 2, radian: 1}
+      matcher_coeff: {class: 2, bbox: 5, giou: 2, rad: 1}
