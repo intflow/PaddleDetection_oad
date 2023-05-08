@@ -195,6 +195,11 @@ class OADDataSet(DetDataset):
                     gt_pose[i][0] = poseid
                     class_pose_id=self.pose_num*catid+poseid
                     gt_class[i][0] = self.catid2clsid[class_pose_id]
+                    # rbbox : cxcywh -> xm,ym,xM,yM
+                    rbox['rbbox'][0] -= rbox['rbbox'][2] / 2
+                    rbox['rbbox'][1] -= rbox['rbbox'][3] / 2
+                    rbox['rbbox'][2] += rbox['rbbox'][0]
+                    rbox['rbbox'][3] += rbox['rbbox'][1]
                     gt_bbox[i, :] = rbox['rbbox'][:4]
                     gt_rad[i, :] = rbox['rbbox'][4]
                     gt_keypoint[i, :] = [rbox['keypoints'][j] for j in range(len(rbox['keypoints'])) if (j+1) % 3 != 0]
@@ -212,6 +217,7 @@ class OADDataSet(DetDataset):
                             np.delete(gt_class, i)
                             np.delete(gt_bbox, i)
                             np.delete(gt_rad, i)
+                            np.delete(gt_keypoint, i)
                         else:
                             gt_poly[i] = rbox['segmentation_rbbox']
                         has_segmentation = True

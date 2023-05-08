@@ -170,6 +170,9 @@ class BaseDataLoader(object):
         self.dataset.set_transform(self._sample_transforms)
         # set kwargs
         self.dataset.set_kwargs(**self.kwargs)
+        
+        # for idx, val in enumerate(self.dataset):
+        #     print(val['gt_bbox'])
         # batch sampler
         if batch_sampler is None:
             self._batch_sampler = DistributedBatchSampler(

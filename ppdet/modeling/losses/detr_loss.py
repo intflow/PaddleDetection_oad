@@ -878,6 +878,7 @@ class DETRLoss_oad(nn.Layer):
 
         if self.use_vfl:
             if sum(len(a) for a in gt_bbox) > 0:
+                # rbbox의 iou를 구하고 싶다면 아래코드부터 진행해야함
                 src_bbox, target_bbox = self._get_src_target_assign(
                     boxes.detach(), gt_bbox, match_indices)
                 # FIXME: Consider using GWD instead of bbox iou to use radian

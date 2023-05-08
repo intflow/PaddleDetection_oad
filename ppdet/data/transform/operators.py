@@ -1714,6 +1714,12 @@ class RandomCrop(BaseOperator):
                 if 'gt_score' in sample:
                     sample['gt_score'] = np.take(
                         sample['gt_score'], valid_ids, axis=0)
+                if 'gt_rad' in sample:
+                    sample['gt_rad'] = np.take(
+                        sample['gt_rad'], valid_ids, axis=0)
+                if 'gt_keypoint' in sample:
+                    sample['gt_keypoint'] = np.take(
+                        sample['gt_keypoint'], valid_ids, axis=0)
 
                 if 'is_crowd' in sample:
                     sample['is_crowd'] = np.take(
