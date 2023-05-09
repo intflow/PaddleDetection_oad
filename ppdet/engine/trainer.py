@@ -274,7 +274,8 @@ class Trainer(object):
                         output_eval=output_eval,
                         bias=bias,
                         IouType=IouType,
-                        save_prediction_only=save_prediction_only)
+                        save_prediction_only=save_prediction_only,
+                        add_rad=self.add_rad)
                 ]
             elif self.cfg.metric == "SNIPERCOCO":  # sniper
                 self._metrics = [

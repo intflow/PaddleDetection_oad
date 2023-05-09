@@ -1,0 +1,40 @@
+I0509 16:11:36.962347 93749 tcp_utils.cc:107] Retry to connect to 127.0.1.1:60572 while the server is not yet listening.
+I0509 16:11:39.962792 93749 tcp_utils.cc:130] Successfully connected to 127.0.1.1:60572
+W0509 16:11:41.599470 93749 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0509 16:11:41.601994 93749 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-09 16:11:42,175] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=0.13s)
+creating index...
+index created!
+W0509 16:11:48.897564 93749 reducer.cc:622] All parameters are involved in the backward pass. It is recommended to set find_unused_parameters to False to improve performance. However, if unused parameters appear in subsequent iterative training, then an error will occur. Please make it clear that in the subsequent training, there will be no parameters that are not used in the backward pass, and then set find_unused_parameters
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   egr::Backward(std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, bool)
+1   egr::RunBackward(std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, bool, bool, std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, bool, std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&)
+2   Conv2dGradNodeFinal::operator()(paddle::small_vector<std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> >, 15u>&, bool, bool)
+3   paddle::experimental::conv2d_grad(paddle::experimental::Tensor const&, paddle::experimental::Tensor const&, paddle::experimental::Tensor const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::string const&, int, std::vector<int, std::allocator<int> > const&, std::string const&, bool, int, bool, paddle::experimental::Tensor*, paddle::experimental::Tensor*)
+4   void phi::ConvCudnnGradKernel<float, phi::GPUContext>(phi::GPUContext const&, phi::DenseTensor const&, phi::DenseTensor const&, phi::DenseTensor const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::string const&, int, std::vector<int, std::allocator<int> > const&, std::string const&, bool, int, bool, phi::DenseTensor*, phi::DenseTensor*)
+5   phi::DnnWorkspaceHandle::RunFunc(std::function<void (void*)> const&, unsigned long)
+6   std::_Function_handler<void (void*), phi::ConvCudnnGradKernel<float, phi::GPUContext>(phi::GPUContext const&, phi::DenseTensor const&, phi::DenseTensor const&, phi::DenseTensor const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::string const&, int, std::vector<int, std::allocator<int> > const&, std::string const&, bool, int, bool, phi::DenseTensor*, phi::DenseTensor*)::{lambda(void*)#1}>::_M_invoke(std::_Any_data const&, void*&&)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683616314 (unix time) try "date -d @1683616314" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0x16dd4) received by PID 93749 (TID 0x7f74027b6740) from PID 93652 ***]
+
+I0509 16:12:06.084966 94884 tcp_utils.cc:107] Retry to connect to 127.0.1.1:58255 while the server is not yet listening.
+I0509 16:12:09.085206 94884 tcp_utils.cc:130] Successfully connected to 127.0.1.1:58255
+W0509 16:12:10.723832 94884 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0509 16:12:10.726344 94884 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-09 16:12:11,295] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=1.95s)
+creating index...
+index created!
+W0509 16:12:23.527822 94884 reducer.cc:622] All parameters are involved in the backward pass. It is recommended to set find_unused_parameters to False to improve performance. However, if unused parameters appear in subsequent iterative training, then an error will occur. Please make it clear that in the subsequent training, there will be no parameters that are not used in the backward pass, and then set find_unused_parameters

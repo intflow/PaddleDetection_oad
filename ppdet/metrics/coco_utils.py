@@ -78,7 +78,8 @@ def cocoapi_eval(jsonfile,
                  max_dets=(100, 300, 1000),
                  classwise=False,
                  sigmas=None,
-                 use_area=True):
+                 use_area=True,
+                 add_rad=False):
     """
     Args:
         jsonfile (str): Evaluation json file, eg: bbox.json, mask.json.
@@ -112,6 +113,11 @@ def cocoapi_eval(jsonfile,
     elif style == 'keypoints_crowd':
         coco_eval = COCOeval(coco_gt, coco_dt, style, sigmas, use_area)
     else:
+        # if문
+        if add_rad: # add_rad일 경우에는 rbbox의 bbox(gt)와 dt(bbox)를 매칭시켜줘야 한다.
+            for tmp_idx, tmp_value in enumerate(coco_gt.dataset['annotations']):
+                coco_gt.dataset['annotations'][tmp_idx]['bbox'] = coco_gt.dataset['annotations'][tmp_idx]['rbbox'][:4]
+            
         coco_eval = COCOeval(coco_gt, coco_dt, style)
     coco_eval.evaluate()
     coco_eval.accumulate()
