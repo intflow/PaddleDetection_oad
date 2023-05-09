@@ -10,6 +10,7 @@ use_focal_loss: True
 eval_size: [640, 640]
 
 
+
 DETR:
   backbone: ResNet
   neck: HybridEncoder

@@ -37,12 +37,16 @@ def visualize_results(image,
                       pose3d_res,
                       im_id,
                       catid2name,
-                      threshold=0.5):
+                      threshold=0.5,
+                      add_rad=False):
     """
     Visualize bbox and mask results
     """
     if bbox_res is not None:
-        image = draw_bbox(image, im_id, catid2name, bbox_res, threshold)
+        if add_rad:
+            image = draw_rbbox(image, im_id, catid2name, bbox_res, threshold)
+        else:
+            image = draw_bbox(image, im_id, catid2name, bbox_res, threshold)
     if mask_res is not None:
         image = draw_mask(image, im_id, mask_res, threshold)
     if segm_res is not None:
@@ -455,3 +459,105 @@ def draw_pose3d(image,
         data.save(save_name)
     else:
         return data
+
+def draw_rbbox(image, im_id, catid2name, bboxes, threshold):
+    """
+    Draw bbox on image
+    """
+    draw = ImageDraw.Draw(image)
+    im_row, im_col = image.size
+
+    catid2color = {}
+    color_list = colormap(rgb=True)[:40]
+    for dt in np.array(bboxes):
+        if im_id != dt['image_id']:
+            continue
+        catid, bbox, score, rad = dt['category_id'], dt['bbox'], dt['score'], dt['rad']
+        if score < threshold:
+            continue
+
+        if catid not in catid2color:
+            idx = np.random.randint(len(color_list))
+            catid2color[catid] = color_list[idx]
+        color = tuple(catid2color[catid])
+
+        # draw rbbox
+        if len(bbox) == 4:
+            # draw rbbox
+            xmin, ymin, w, h = bbox
+            # rbbox_4point_by_draw = rotated_coordinate(im_row, im_col, xmin, ymin, w, h, rad)
+            rbbox_4point_by_draw = rectangle_to_points(xmin, ymin, w, h, rad)
+            draw.line(
+                rbbox_4point_by_draw,
+                width=2,
+                fill=color)
+        elif len(bbox) == 8:
+            x1, y1, x2, y2, x3, y3, x4, y4 = bbox
+            draw.line(
+                [(x1, y1), (x2, y2), (x3, y3), (x4, y4), (x1, y1)],
+                width=2,
+                fill=color)
+            xmin = min(x1, x2, x3, x4)
+            ymin = min(y1, y2, y3, y4)
+        else:
+            logger.error('the shape of bbox must be [M, 4] or [M, 8]!')
+
+        # draw label
+        text = "{} {:.2f}".format(catid2name[catid], score)
+        tw, th = draw.textsize(text)
+        draw.rectangle(
+            [(xmin + 1, ymin - th), (xmin + tw + 1, ymin)], fill=color)
+        draw.text((xmin + 1, ymin - th), text, fill=(255, 255, 255))
+
+    return image
+
+def rotate(origin, point, radian): # origin을 중심으로 point를 angle(radian) 한 값이 (qx,qy) 
+
+    ox, oy = origin 
+    px, py = point
+    
+    qx = ox + math.cos(radian) * (px - ox) - math.sin(radian) * (py - oy)
+    qy = oy + math.sin(radian) * (px - ox) + math.cos(radian) * (py - oy)
+    
+    return qx, qy
+
+def rotated_coordinate(im_row, im_col, xmin, ymin, width, height, rad):
+
+    cx = round(im_row/2)
+    cy = round(im_col/2)
+
+    rotated_x1,rotated_y1=rotate((cx,cy),(xmin,ymin),-rad)
+    rotated_x2,rotated_y2=rotate((cx,cy),(xmin,ymin+height),-rad)
+    rotated_x3,rotated_y3=rotate((cx,cy),(xmin+width,ymin+height),-rad)
+    rotated_x4,rotated_y4=rotate((cx,cy),(xmin+width,ymin),-rad)
+
+    return ((rotated_x1,rotated_y1),
+            (rotated_x2,rotated_y2),
+            (rotated_x3,rotated_y3),
+            (rotated_x4,rotated_y4),
+            (rotated_x1,rotated_y1))
+
+def rectangle_to_points(xmin, ymin, width, height, radian):
+    # Calculate the half-width and half-height of the rectangle
+    hw = width / 2
+    hh = height / 2
+
+    # Calculate the center point of the rectangle
+    cx = xmin + hw
+    cy = ymin + hh
+
+    # Calculate the sine and cosine of the rotation angle
+    s = math.sin(radian)
+    c = math.cos(radian)
+
+    # Calculate the coordinates of the four points that define the rectangle
+    x1 = cx + c * -hw - s * -hh
+    y1 = cy + s * -hw + c * -hh
+    x2 = cx + c * hw - s * -hh
+    y2 = cy + s * hw + c * -hh
+    x3 = cx + c * hw - s * hh
+    y3 = cy + s * hw + c * hh
+    x4 = cx + c * -hw - s * hh
+    y4 = cy + s * -hw + c * hh
+
+    return (x1, y1), (x2, y2), (x3, y3), (x4, y4), (x1, y1)

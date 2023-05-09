@@ -10,10 +10,13 @@ architecture: DETR
 weights: output/rtdetr_r50vd_6x_EFID2023/model_final
 find_unused_parameters: True
 log_iter: 200
+epoch: 2
+add_rad: True
 
 DETR:
   transformer: RTDETRTransformer_oad
   detr_head: DINOHEAD_oad
+  post_process: DETRPostProcess_oad
 
 RTDETRTransformer_oad:
   num_queries: 300

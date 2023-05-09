@@ -651,4 +651,4 @@ class DINOHEAD_oad(nn.Layer):
                 dn_out_logits=dn_out_logits,
                 dn_meta=dn_meta)
         else:
-            return (dec_out_bboxes[-1], dec_out_logits[-1], None)
+            return (dec_out_bboxes[-1], dec_out_logits[-1], dec_out_rads[-1], None)

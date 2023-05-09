@@ -72,6 +72,7 @@ class Trainer(object):
         self.amp_level = self.cfg.get('amp_level', 'O1')
         self.custom_white_list = self.cfg.get('custom_white_list', None)
         self.custom_black_list = self.cfg.get('custom_black_list', None)
+        self.add_rad = self.cfg.get('add_rad', False)
         if 'slim' in cfg and cfg['slim_type'] == 'PTQ':
             self.cfg['TestDataset'] = create('TestDataset')()
 
@@ -1013,7 +1014,11 @@ class Trainer(object):
 
         if visualize:
             for outs in results:
-                batch_res = get_infer_results(outs, clsid2catid)
+                # 임시코드
+                for cls_id in np.unique(outs['bbox'][:,0]):
+                    if cls_id not in clsid2catid.keys():
+                        clsid2catid[cls_id] = 0
+                batch_res = get_infer_results(outs, clsid2catid, 0, self.add_rad)
                 bbox_num = outs['bbox_num']
 
                 start = 0
@@ -1036,7 +1041,7 @@ class Trainer(object):
                             if 'pose3d' in batch_res else None
                     image = visualize_results(
                         image, bbox_res, mask_res, segm_res, keypoint_res,
-                        pose3d_res, int(im_id), catid2name, draw_threshold)
+                        pose3d_res, int(im_id), catid2name, draw_threshold, add_rad=self.add_rad)
                     self.status['result_image'] = np.array(image.copy())
                     if self._compose_callback:
                         self._compose_callback.on_step_end(self.status)

@@ -45,7 +45,7 @@ def parse_args():
     parser.add_argument(
         "--infer_dir",
         type=str,
-        default=None,
+        default="/DL_data_super_ssd/EFID2023/new_hallway/val/image",
         help="Directory for images to perform inference on.")
     parser.add_argument(
         "--infer_img",
@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="output",
+        default="output/test",
         help="Directory for storing the output visualization files.")
     parser.add_argument(
         "--draw_threshold",

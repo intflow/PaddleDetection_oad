@@ -47,7 +47,7 @@ def parse_args():
     parser.add_argument(
         "--eval",
         action='store_true',
-        default=False,
+        default=True,
         help="Whether to perform evaluation in train")
     parser.add_argument(
         "-r", "--resume", default=None, help="weights path for resume")

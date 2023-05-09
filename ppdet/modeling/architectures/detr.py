@@ -98,7 +98,7 @@ class DETR(BaseArch):
         else:
             preds = self.detr_head(out_transformer, body_feats)
             if self.exclude_post_process:
-                bbox, bbox_num, mask = preds
+                bbox, bbox_num, rad, mask = preds
             else:
                 bbox, bbox_num, mask = self.post_process(
                     preds, self.inputs['im_shape'], self.inputs['scale_factor'],

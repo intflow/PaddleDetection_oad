@@ -15,7 +15,7 @@ import six
 import numpy as np
 
 
-def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0):
+def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0, add_rad=False):
     det_res = []
     k = 0
     for i in range(len(bbox_nums)):
@@ -24,19 +24,31 @@ def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0):
         for j in range(det_nums):
             dt = bboxes[k]
             k = k + 1
-            num_id, score, xmin, ymin, xmax, ymax = dt.tolist()
+            if add_rad:
+                num_id, score, xmin, ymin, xmax, ymax, rad = dt.tolist()
+            else:
+                num_id, score, xmin, ymin, xmax, ymax = dt.tolist()
             if int(num_id) < 0:
                 continue
             category_id = label_to_cat_id_map[int(num_id)]
             w = xmax - xmin + bias
             h = ymax - ymin + bias
             bbox = [xmin, ymin, w, h]
-            dt_res = {
-                'image_id': cur_image_id,
-                'category_id': category_id,
-                'bbox': bbox,
-                'score': score
-            }
+            if add_rad:
+                dt_res = {
+                    'image_id': cur_image_id,
+                    'category_id': category_id,
+                    'bbox': bbox,
+                    'score': score,
+                    'rad': rad
+                }
+            else:
+                dt_res = {
+                    'image_id': cur_image_id,
+                    'category_id': category_id,
+                    'bbox': bbox,
+                    'score': score
+                }
             det_res.append(dt_res)
     return det_res
 

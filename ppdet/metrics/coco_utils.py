@@ -28,7 +28,7 @@ from ppdet.utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 
-def get_infer_results(outs, catid, bias=0):
+def get_infer_results(outs, catid, bias=0, add_rad=False):
     """
     Get result at the stage of inference.
     The output format is dictionary containing bbox or mask result.
@@ -45,12 +45,12 @@ def get_infer_results(outs, catid, bias=0):
 
     infer_res = {}
     if 'bbox' in outs:
-        if len(outs['bbox']) > 0 and len(outs['bbox'][0]) > 6:
+        if len(outs['bbox']) > 0 and len(outs['bbox'][0]) > 6 and add_rad != True:
             infer_res['bbox'] = get_det_poly_res(
                 outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias)
         else:
             infer_res['bbox'] = get_det_res(
-                outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias)
+                outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias, add_rad=add_rad)
 
     if 'mask' in outs:
         # mask post process
