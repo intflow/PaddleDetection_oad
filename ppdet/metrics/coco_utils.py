@@ -115,8 +115,10 @@ def cocoapi_eval(jsonfile,
     else:
         # if문
         if add_rad: # add_rad일 경우에는 rbbox의 bbox(gt)와 dt(bbox)를 매칭시켜줘야 한다.
-            for tmp_idx, tmp_value in enumerate(coco_gt.dataset['annotations']):
-                coco_gt.dataset['annotations'][tmp_idx]['bbox'] = coco_gt.dataset['annotations'][tmp_idx]['rbbox'][:4]
+            for tmp_idx, _ in enumerate(coco_gt.dataset['annotations']):
+                cx, cy, witdh, height = coco_gt.dataset['annotations'][tmp_idx]['rbbox'][:4]
+                xmin, ymin = cx - witdh / 2, cy - height / 2 
+                coco_gt.dataset['annotations'][tmp_idx]['bbox'] = [xmin, ymin, witdh, height]
             
         coco_eval = COCOeval(coco_gt, coco_dt, style)
     coco_eval.evaluate()
