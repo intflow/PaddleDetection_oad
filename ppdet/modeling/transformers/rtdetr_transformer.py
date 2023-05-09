@@ -899,9 +899,11 @@ class RTDETRTransformer_oad(nn.Layer):
         reference_points_unact = paddle.gather_nd(enc_outputs_coord_unact,
                                                   topk_ind)  # unsigmoided. {4, 300, 4}
         enc_topk_bboxes = F.sigmoid(reference_points_unact)
+        
         #! radian
         #! sigmoid는 0~1 사이 값으로 고정하는 역할이므로 radian은 해당 안됨
         enc_topk_radian = paddle.gather_nd(enc_outputs_radian, topk_ind)
+        reference_radian = enc_topk_radian # 임시코드
         
         if denoising_bbox_unact is not None:
             reference_points_unact = paddle.concat(

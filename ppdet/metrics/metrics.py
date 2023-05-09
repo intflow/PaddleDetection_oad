@@ -110,6 +110,11 @@ class COCOMetric(Metric):
             im_id = inputs['im_id']
         outs['im_id'] = im_id.numpy() if isinstance(im_id,
                                                     paddle.Tensor) else im_id
+        
+        # 나중에 없어질 코드
+        for cls_id in np.unique(outs['bbox'][:,0]):
+            if cls_id not in self.clsid2catid.keys():
+                self.clsid2catid[cls_id] = 0
 
         infer_results = get_infer_results(
             outs, self.clsid2catid, bias=self.bias)
