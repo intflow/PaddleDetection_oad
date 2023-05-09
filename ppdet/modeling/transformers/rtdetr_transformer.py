@@ -716,6 +716,8 @@ class RTDETRTransformer_oad(nn.Layer):
         constant_(self.enc_score_head.bias, bias_cls)
         constant_(self.enc_bbox_head.layers[-1].weight)
         constant_(self.enc_bbox_head.layers[-1].bias)
+        constant_(self.enc_rad_head.layers[-1].weight)
+        constant_(self.enc_rad_head.layers[-1].bias)
         for cls_, reg_ in zip(self.dec_score_head, self.dec_bbox_head):
             linear_init_(cls_)
             constant_(cls_.bias, bias_cls)
