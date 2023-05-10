@@ -15,6 +15,7 @@ __pycache__/
 
 # log file
 *.log
+log/workerlog.*
 
 # Distribution / packaging
 /bin/
