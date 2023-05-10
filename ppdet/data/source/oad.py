@@ -196,6 +196,7 @@ class OADDataSet(DetDataset):
                     class_pose_id=self.pose_num*catid+poseid
                     gt_class[i][0] = self.catid2clsid[class_pose_id]
                     # rbbox : cxcywh -> xm,ym,xM,yM
+                    rbox['rbbox'] = self.fix_radian_to_intflow(rbox['rbbox'])
                     rbox['rbbox'][0] -= rbox['rbbox'][2] / 2
                     rbox['rbbox'][1] -= rbox['rbbox'][3] / 2
                     rbox['rbbox'][2] += rbox['rbbox'][0]
@@ -268,3 +269,37 @@ class OADDataSet(DetDataset):
             empty_records = self._sample_empty(empty_records, len(records))
             records += empty_records
         self.roidbs = records
+        
+    def fix_radian_to_intflow(self, rbbox):
+        
+        cx, cy, width, height, rad = rbbox
+        
+        if rad > np.pi*2:
+            rad -= np.pi*2
+        elif rad < 0:
+            rad += np.pi*2
+            
+        #-pi ~ pi
+        if rad >= np.pi:
+            rad = -1*(2*np.pi - rad)
+            
+        ####keep radians between -05pi ~ 05pi
+        if rad >= np.pi*0.5:
+            rad = rad - np.pi
+        elif rad <= np.pi*(-0.5):
+            rad = rad  + np.pi
+            
+        #Regularize pi range from -0.25pi~0.25pi
+        if rad >= 0.25*np.pi:
+            rad -= 0.5*np.pi
+            h_tmp = height
+            height = width
+            width = h_tmp
+            
+        if rad <= -0.25*np.pi:
+            rad += 0.5*np.pi
+            h_tmp = height
+            height = width
+            width = h_tmp
+            
+        return [cx,cy,width,height,rad]
