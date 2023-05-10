@@ -222,7 +222,8 @@ def get_contrastive_denoising_training_group(targets,
                                              num_denoising=100,
                                              label_noise_ratio=0.5,
                                              box_noise_scale=1.0,
-                                             active_radian=False):
+                                             active_radian=False,
+                                             active_kpts=False):
     if num_denoising <= 0:
         return None, None, None, None
     num_gts = [len(t) for t in targets["gt_class"]]
