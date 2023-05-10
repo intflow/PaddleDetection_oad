@@ -806,7 +806,7 @@ class RTDETRTransformer_oad(nn.Layer):
 
         # prepare denoising training
         if self.training:
-            denoising_class, denoising_bbox_unact, denoising_radian, attn_mask, dn_meta = \
+            denoising_class, denoising_bbox_unact, denoising_rad, attn_mask, dn_meta = \
                 get_contrastive_denoising_training_group(gt_meta,
                                             self.num_classes,
                                             self.num_queries,
@@ -816,18 +816,18 @@ class RTDETRTransformer_oad(nn.Layer):
                                             self.box_noise_scale,
                                             active_radian=True)
         else:
-            denoising_class, denoising_bbox_unact, denoising_radian, attn_mask, dn_meta = None, None, None, None, None
+            denoising_class, denoising_bbox_unact, denoising_rad, attn_mask, dn_meta = None, None, None, None, None
 
         # FIXME Chnage
-        target, init_ref_points_unact, enc_topk_bboxes, init_ref_radian, enc_topk_radian, enc_topk_logits = \
+        target, init_ref_points_unact, enc_topk_bboxes, init_ref_rad, enc_topk_rad, enc_topk_logits = \
             self._get_decoder_input(
-            memory, spatial_shapes, denoising_class, denoising_bbox_unact, denoising_radian)
+            memory, spatial_shapes, denoising_class, denoising_bbox_unact, denoising_rad)
 
         # decoder
-        out_bboxes, out_radian, out_logits = self.decoder(
+        out_bboxes, out_rad, out_logits = self.decoder(
             target,
             init_ref_points_unact,
-            init_ref_radian,
+            init_ref_rad,
             memory,
             spatial_shapes,
             level_start_index,
@@ -836,7 +836,7 @@ class RTDETRTransformer_oad(nn.Layer):
             self.dec_score_head,
             self.query_pos_head,
             attn_mask=attn_mask)
-        return (out_bboxes, out_radian, out_logits, enc_topk_bboxes, enc_topk_radian, enc_topk_logits,
+        return (out_bboxes, out_rad, out_logits, enc_topk_bboxes, enc_topk_rad, enc_topk_logits,
                 dn_meta)
 
     def _generate_anchors(self,
@@ -876,7 +876,7 @@ class RTDETRTransformer_oad(nn.Layer):
                            spatial_shapes,
                            denoising_class=None,
                            denoising_bbox_unact=None,
-                           denoising_radian=None):
+                           denoising_rad=None):
         bs, _, _ = memory.shape
         # prepare input for decoder
         if self.training or self.eval_size is None:
@@ -889,7 +889,7 @@ class RTDETRTransformer_oad(nn.Layer):
         enc_outputs_class = self.enc_score_head(output_memory)
         enc_outputs_coord_unact = self.enc_bbox_head(output_memory) + anchors
         #! radian
-        enc_outputs_radian = self.enc_rad_head(output_memory)
+        enc_outputs_rad = self.enc_rad_head(output_memory)
 
         _, topk_ind = paddle.topk(
             enc_outputs_class.max(-1), self.num_queries, axis=1)
@@ -904,20 +904,20 @@ class RTDETRTransformer_oad(nn.Layer):
         
         #! radian
         #! sigmoid는 0~1 사이 값으로 고정하는 역할이므로 radian은 해당 안됨
-        enc_topk_radian = paddle.gather_nd(enc_outputs_radian, topk_ind)
-        reference_radian = enc_topk_radian # 임시코드
+        enc_topk_rad = paddle.gather_nd(enc_outputs_rad, topk_ind)
+        reference_rad = enc_topk_rad # 임시코드
         
         if denoising_bbox_unact is not None:
             reference_points_unact = paddle.concat(
                 [denoising_bbox_unact, reference_points_unact], 1) # {4, 490, 4}
         
-        if denoising_radian is not None:
-            reference_radian = paddle.concat(
-                [denoising_radian, enc_topk_radian], 1) # {4, 490, 1}
+        if denoising_rad is not None:
+            reference_rad = paddle.concat(
+                [denoising_rad, enc_topk_rad], 1) # {4, 490, 1}
             
         if self.training:
             reference_points_unact = reference_points_unact.detach()
-            reference_radian = reference_radian.detach()
+            reference_rad = reference_rad.detach()
             
         enc_topk_logits = paddle.gather_nd(enc_outputs_class, topk_ind)
 
@@ -931,7 +931,7 @@ class RTDETRTransformer_oad(nn.Layer):
         if denoising_class is not None:
             target = paddle.concat([denoising_class, target], 1)
 
-        return target, reference_points_unact, enc_topk_bboxes, reference_radian, enc_topk_radian, enc_topk_logits
+        return target, reference_points_unact, enc_topk_bboxes, reference_rad, enc_topk_rad, enc_topk_logits
 
 # ---------------------------------------------------------------------
 
@@ -1042,7 +1042,8 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
                  learnt_init_query=True,
                  eval_size=None,
                  eval_idx=-1,
-                 eps=1e-2):
+                 eps=1e-2,
+                 out_kpts_layer=0):
         super(RTDETRTransformer_oad_kpts, self).__init__()
         assert position_embed_type in ['sine', 'learned'], \
             f'ValueError: position_embed_type not supported {position_embed_type}!'
@@ -1060,6 +1061,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         self.eps = eps
         self.num_decoder_layers = num_decoder_layers
         self.eval_size = eval_size
+        self.out_kpts_layer = out_kpts_layer
 
         # backbone feature projection
         self._build_input_proj_layer(backbone_feat_channels)
@@ -1096,6 +1098,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         self.enc_score_head = nn.Linear(hidden_dim, num_classes)
         self.enc_bbox_head = MLP(hidden_dim, hidden_dim, 4, num_layers=3)
         self.enc_rad_head = MLP(hidden_dim, hidden_dim, 1, num_layers=1)
+        self.enc_kpts_head = MLP(hidden_dim, hidden_dim, out_kpts_layer, num_layers=3)
 
         # decoder head
         self.dec_score_head = nn.LayerList([
@@ -1108,6 +1111,10 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         ])
         self.dec_rad_head = nn.LayerList([
             MLP(hidden_dim, hidden_dim, 1, num_layers=1)
+            for _ in range(num_decoder_layers)
+        ])
+        self.dec_kpts_head = nn.LayerList([
+            MLP(hidden_dim, hidden_dim, out_kpts_layer, num_layers=3)
             for _ in range(num_decoder_layers)
         ])
 
@@ -1123,6 +1130,8 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         constant_(self.enc_bbox_head.layers[-1].bias)
         constant_(self.enc_rad_head.layers[-1].weight)
         constant_(self.enc_rad_head.layers[-1].bias)
+        constant_(self.enc_kpts_head.layers[-1].weight)
+        constant_(self.enc_kpts_head.layers[-1].bias)
         for cls_, reg_ in zip(self.dec_score_head, self.dec_bbox_head):
             linear_init_(cls_)
             constant_(cls_.bias, bias_cls)
@@ -1211,7 +1220,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
 
         # prepare denoising training
         if self.training:
-            denoising_class, denoising_bbox_unact, denoising_radian, attn_mask, dn_meta = \
+            denoising_class, denoising_bbox_unact, denoising_rad, denoising_kpts, attn_mask, dn_meta = \
                 get_contrastive_denoising_training_group(gt_meta,
                                             self.num_classes,
                                             self.num_queries,
@@ -1219,29 +1228,31 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
                                             self.num_denoising,
                                             self.label_noise_ratio,
                                             self.box_noise_scale,
-                                            active_radian=True)
+                                            active_radian=True,
+                                            active_kpts=self.out_kpts_layer)
         else:
-            denoising_class, denoising_bbox_unact, denoising_radian, attn_mask, dn_meta = None, None, None, None, None
+            denoising_class, denoising_bbox_unact, denoising_rad, denoising_kpts, attn_mask, dn_meta = None, None, None, None, None, None
 
-        # FIXME Chnage
-        target, init_ref_points_unact, enc_topk_bboxes, init_ref_radian, enc_topk_radian, enc_topk_logits = \
+        target, init_ref_points_unact, enc_topk_bboxes, init_ref_rad, enc_topk_rad, init_ref_kpts, enc_topk_kpts, enc_topk_logits = \
             self._get_decoder_input(
-            memory, spatial_shapes, denoising_class, denoising_bbox_unact, denoising_radian)
+            memory, spatial_shapes, denoising_class, denoising_bbox_unact, denoising_rad, denoising_kpts)
 
         # decoder
-        out_bboxes, out_radian, out_logits = self.decoder(
+        out_bboxes, out_rad, out_kpts, out_logits = self.decoder(
             target,
             init_ref_points_unact,
-            init_ref_radian,
+            init_ref_rad,
+            init_ref_kpts,
             memory,
             spatial_shapes,
             level_start_index,
             self.dec_bbox_head,
             self.dec_rad_head,
+            self.dec_kpts_head,
             self.dec_score_head,
             self.query_pos_head,
             attn_mask=attn_mask)
-        return (out_bboxes, out_radian, out_logits, enc_topk_bboxes, enc_topk_radian, enc_topk_logits,
+        return (out_bboxes, out_rad, out_kpts, out_logits, enc_topk_bboxes, enc_topk_rad, enc_topk_kpts, enc_topk_logits,
                 dn_meta)
 
     def _generate_anchors(self,
@@ -1281,7 +1292,8 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
                            spatial_shapes,
                            denoising_class=None,
                            denoising_bbox_unact=None,
-                           denoising_radian=None):
+                           denoising_rad=None,
+                           denoising_kpts=None):
         bs, _, _ = memory.shape
         # prepare input for decoder
         if self.training or self.eval_size is None:
@@ -1294,7 +1306,9 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         enc_outputs_class = self.enc_score_head(output_memory)
         enc_outputs_coord_unact = self.enc_bbox_head(output_memory) + anchors
         #! radian
-        enc_outputs_radian = self.enc_rad_head(output_memory)
+        enc_outputs_rad = self.enc_rad_head(output_memory)
+        #! kpts
+        enc_outputs_kpts = self.enc_kpts_head(output_memory)
 
         _, topk_ind = paddle.topk(
             enc_outputs_class.max(-1), self.num_queries, axis=1)
@@ -1307,22 +1321,31 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
                                                   topk_ind)  # unsigmoided. {4, 300, 4}
         enc_topk_bboxes = F.sigmoid(reference_points_unact)
         
-        #! radian
-        #! sigmoid는 0~1 사이 값으로 고정하는 역할이므로 radian은 해당 안됨
-        enc_topk_radian = paddle.gather_nd(enc_outputs_radian, topk_ind)
-        reference_radian = enc_topk_radian # 임시코드
+        #! rad
+        #! sigmoid는 0~1 사이 값으로 고정하는 역할이므로 rad는 해당 안됨
+        enc_topk_rad = paddle.gather_nd(enc_outputs_rad, topk_ind)
+        reference_rad = enc_topk_rad # 임시코드
+        
+        #! kpts
+        reference_kpts = paddle.gather_nd(enc_outputs_kpts, topk_ind)
+        enc_topk_kpts = F.sigmoid(reference_kpts)
         
         if denoising_bbox_unact is not None:
             reference_points_unact = paddle.concat(
                 [denoising_bbox_unact, reference_points_unact], 1) # {4, 490, 4}
         
-        if denoising_radian is not None:
-            reference_radian = paddle.concat(
-                [denoising_radian, enc_topk_radian], 1) # {4, 490, 1}
+        if denoising_rad is not None:
+            reference_rad = paddle.concat(
+                [denoising_rad, enc_topk_rad], 1) # {4, 490, 1}
+            
+        if denoising_kpts is not None:
+            reference_kpts = paddle.concat(
+                [denoising_kpts, reference_kpts], 1) # {4, 490, N}
             
         if self.training:
             reference_points_unact = reference_points_unact.detach()
-            reference_radian = reference_radian.detach()
+            reference_rad = reference_rad.detach()
+            reference_kpts = reference_kpts.detach()
             
         enc_topk_logits = paddle.gather_nd(enc_outputs_class, topk_ind)
 
@@ -1336,4 +1359,4 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         if denoising_class is not None:
             target = paddle.concat([denoising_class, target], 1)
 
-        return target, reference_points_unact, enc_topk_bboxes, reference_radian, enc_topk_radian, enc_topk_logits
+        return target, reference_points_unact, enc_topk_bboxes, reference_rad, enc_topk_rad, reference_kpts, enc_topk_kpts, enc_topk_logits

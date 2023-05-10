@@ -1315,9 +1315,11 @@ class DETRLoss_oad_kpts(nn.Layer):
     def _get_prediction_loss(self,
                              boxes,
                              rads,
+                             kpts,
                              logits,
                              gt_bbox,
                              gt_rad,
+                             gt_keypoint,
                              gt_class,
                              masks=None,
                              gt_mask=None,
@@ -1326,7 +1328,7 @@ class DETRLoss_oad_kpts(nn.Layer):
                              num_gts=1):
         if dn_match_indices is None:
             match_indices = self.matcher(
-                boxes, rads, logits, gt_bbox, gt_rad, gt_class, masks=masks, gt_mask=gt_mask)
+                boxes, rads, kpts, logits, gt_bbox, gt_rad, gt_keypoint, gt_class, masks=masks, gt_mask=gt_mask)
         else:
             match_indices = dn_match_indices
 
@@ -1363,9 +1365,11 @@ class DETRLoss_oad_kpts(nn.Layer):
     def forward(self,
                 boxes,
                 rads,
+                kpts,
                 logits,
                 gt_bbox,
                 gt_rad,
+                gt_keypoint,
                 gt_class,
                 masks=None,
                 gt_mask=None,
@@ -1390,9 +1394,11 @@ class DETRLoss_oad_kpts(nn.Layer):
         total_loss = self._get_prediction_loss(
             boxes[-1],
             rads[-1],
+            kpts[-1],
             logits[-1],
             gt_bbox,
             gt_rad,
+            gt_keypoint,
             gt_class,
             masks=masks[-1] if masks is not None else None,
             gt_mask=gt_mask,
@@ -1423,9 +1429,11 @@ class DINOLoss_oad_kpts(DETRLoss_oad_kpts):
     def forward(self,
                 boxes,
                 rads,
+                kpts,
                 logits,
                 gt_bbox,
                 gt_rad,
+                gt_keypoint,
                 gt_class,
                 masks=None,
                 gt_mask=None,
@@ -1437,7 +1445,7 @@ class DINOLoss_oad_kpts(DETRLoss_oad_kpts):
                 **kwargs):
         num_gts = self._get_num_gts(gt_class)
         total_loss = super(DINOLoss_oad_kpts, self).forward(
-            boxes, rads, logits, gt_bbox, gt_rad, gt_class, num_gts=num_gts)
+            boxes, rads, kpts, logits, gt_bbox, gt_rad, gt_keypoint, gt_class, num_gts=num_gts)
 
         if dn_meta is not None:
             dn_positive_idx, dn_num_group = \

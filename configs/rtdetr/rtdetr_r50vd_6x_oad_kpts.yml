@@ -33,6 +33,7 @@ RTDETRTransformer_oad_kpts:
   label_noise_ratio: 0.5
   box_noise_scale: 1.0
   learnt_init_query: False
+  out_kpts_layer: 6
 
 DINOHEAD_oad_kpts:
   loss:
@@ -41,5 +42,5 @@ DINOHEAD_oad_kpts:
     aux_loss: True
     use_vfl: True
     matcher:
-      name: HungarianMatcher_oad
+      name: HungarianMatcher_oad_kpts
       matcher_coeff: {class: 2, bbox: 5, giou: 2, rad: 1}
