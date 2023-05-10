@@ -10,8 +10,14 @@ architecture: DETR
 weights: output/rtdetr_r50vd_6x_EFID2023/model_final
 find_unused_parameters: True
 log_iter: 200
-epoch: 10
+epoch: 76
 add_rad: True
+
+TrainReader:
+  batch_size: 8
+
+EvalReader:
+  batch_size: 8
 
 DETR:
   transformer: RTDETRTransformer_oad
