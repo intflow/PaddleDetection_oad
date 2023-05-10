@@ -73,6 +73,7 @@ class Trainer(object):
         self.custom_white_list = self.cfg.get('custom_white_list', None)
         self.custom_black_list = self.cfg.get('custom_black_list', None)
         self.add_rad = self.cfg.get('add_rad', False)
+        self.add_kpts = self.cfg.get('add_kpts', 0)
         if 'slim' in cfg and cfg['slim_type'] == 'PTQ':
             self.cfg['TestDataset'] = create('TestDataset')()
 
@@ -275,7 +276,8 @@ class Trainer(object):
                         bias=bias,
                         IouType=IouType,
                         save_prediction_only=save_prediction_only,
-                        add_rad=self.add_rad)
+                        add_rad=self.add_rad,
+                        add_kpts=self.add_kpts)
                 ]
             elif self.cfg.metric == "SNIPERCOCO":  # sniper
                 self._metrics = [
@@ -1019,7 +1021,7 @@ class Trainer(object):
                 for cls_id in np.unique(outs['bbox'][:,0]):
                     if cls_id not in clsid2catid.keys():
                         clsid2catid[cls_id] = 0
-                batch_res = get_infer_results(outs, clsid2catid, 0, self.add_rad)
+                batch_res = get_infer_results(outs, clsid2catid, 0, self.add_rad, self.add_kpts)
                 bbox_num = outs['bbox_num']
 
                 start = 0
@@ -1042,7 +1044,7 @@ class Trainer(object):
                             if 'pose3d' in batch_res else None
                     image = visualize_results(
                         image, bbox_res, mask_res, segm_res, keypoint_res,
-                        pose3d_res, int(im_id), catid2name, draw_threshold, add_rad=self.add_rad)
+                        pose3d_res, int(im_id), catid2name, draw_threshold, add_rad=self.add_rad, add_kpts=self.add_kpts)
                     self.status['result_image'] = np.array(image.copy())
                     if self._compose_callback:
                         self._compose_callback.on_step_end(self.status)

@@ -12,7 +12,7 @@ find_unused_parameters: True
 log_iter: 200
 epoch: 75
 add_rad: True
-add_kpts: True
+add_kpts: 6 # 3 x 2 ( 3 : kepoint 갯수, 2 : (x, y) )
 
 DETR:
   transformer: RTDETRTransformer_oad_kpts

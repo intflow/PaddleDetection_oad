@@ -557,22 +557,22 @@ class TransformerDecoder_oad(nn.Layer):
     def forward(self,
                 tgt,
                 ref_points_unact,
-                ref_radian,
+                ref_rad,
                 memory,
                 memory_spatial_shapes,
                 memory_level_start_index,
                 bbox_head,
-                radian_head,
+                rad_head,
                 score_head,
                 query_pos_head,
                 attn_mask=None,
                 memory_mask=None):
         output = tgt
         dec_out_bboxes = []
-        dec_out_radian = []
+        dec_out_rad = []
         dec_out_logits = []
         ref_points_detach = F.sigmoid(ref_points_unact)
-        ref_radian_detach = ref_radian
+        ref_rad_detach = ref_rad
         for i, layer in enumerate(self.layers):
             ref_points_input = ref_points_detach.unsqueeze(2)
             query_pos_embed = query_pos_head(ref_points_detach) # ?????
@@ -584,33 +584,33 @@ class TransformerDecoder_oad(nn.Layer):
             inter_ref_bbox = F.sigmoid(bbox_head[i](output) + inverse_sigmoid(
                 ref_points_detach))
             
-            inter_ref_radian = radian_head[i](output) + ref_radian_detach
+            inter_ref_rad = rad_head[i](output) + ref_rad_detach
 
             if self.training:
                 dec_out_logits.append(score_head[i](output))
                 if i == 0:
                     dec_out_bboxes.append(inter_ref_bbox)
-                    dec_out_radian.append(inter_ref_radian)
+                    dec_out_rad.append(inter_ref_rad)
                 else:
                     dec_out_bboxes.append(
                         F.sigmoid(bbox_head[i](output) + inverse_sigmoid(
                             ref_points)))
-                    dec_out_radian.append(radian_head[i](output) + ref_radian)
+                    dec_out_rad.append(rad_head[i](output) + ref_rad)
 
             elif i == self.eval_idx:
                 dec_out_logits.append(score_head[i](output))
                 dec_out_bboxes.append(inter_ref_bbox)
-                dec_out_radian.append(inter_ref_radian)
+                dec_out_rad.append(inter_ref_rad)
 
             ref_points = inter_ref_bbox
             ref_points_detach = inter_ref_bbox.detach(
             ) if self.training else inter_ref_bbox
             
-            ref_radian = inter_ref_radian
-            ref_radian_detach = inter_ref_radian.detach(
-            ) if self.training else inter_ref_radian
+            ref_rad = inter_ref_rad
+            ref_rad_detach = inter_ref_rad.detach(
+            ) if self.training else inter_ref_rad
 
-        return paddle.stack(dec_out_bboxes), paddle.stack(dec_out_radian), paddle.stack(dec_out_logits)
+        return paddle.stack(dec_out_bboxes), paddle.stack(dec_out_rad), paddle.stack(dec_out_logits)
 
 # ANCHOR : intflow
 @register
@@ -947,22 +947,26 @@ class TransformerDecoder_oad_kpts(nn.Layer):
     def forward(self,
                 tgt,
                 ref_points_unact,
-                ref_radian,
+                ref_rad,
+                ref_kpts,
                 memory,
                 memory_spatial_shapes,
                 memory_level_start_index,
                 bbox_head,
-                radian_head,
+                rad_head,
+                kpts_head,
                 score_head,
                 query_pos_head,
                 attn_mask=None,
                 memory_mask=None):
         output = tgt
         dec_out_bboxes = []
-        dec_out_radian = []
+        dec_out_rad = []
+        dec_out_kpts = []
         dec_out_logits = []
         ref_points_detach = F.sigmoid(ref_points_unact)
-        ref_radian_detach = ref_radian
+        ref_rad_detach = ref_rad
+        ref_kpts_detach = F.sigmoid(ref_kpts)
         for i, layer in enumerate(self.layers):
             ref_points_input = ref_points_detach.unsqueeze(2)
             query_pos_embed = query_pos_head(ref_points_detach) # ?????
@@ -974,33 +978,43 @@ class TransformerDecoder_oad_kpts(nn.Layer):
             inter_ref_bbox = F.sigmoid(bbox_head[i](output) + inverse_sigmoid(
                 ref_points_detach))
             
-            inter_ref_radian = radian_head[i](output) + ref_radian_detach
+            inter_ref_rad = rad_head[i](output) + ref_rad_detach
+            
+            # FIXME : rad와 똑같이 layer 했으나, bbox랑 맞춰야 하지 않을까?
+            inter_ref_kpts = kpts_head[i](output) + ref_kpts_detach
 
             if self.training:
                 dec_out_logits.append(score_head[i](output))
                 if i == 0:
                     dec_out_bboxes.append(inter_ref_bbox)
-                    dec_out_radian.append(inter_ref_radian)
+                    dec_out_rad.append(inter_ref_rad)
+                    dec_out_kpts.append(inter_ref_kpts)
                 else:
                     dec_out_bboxes.append(
                         F.sigmoid(bbox_head[i](output) + inverse_sigmoid(
                             ref_points)))
-                    dec_out_radian.append(radian_head[i](output) + ref_radian)
+                    dec_out_rad.append(rad_head[i](output) + ref_rad)
+                    dec_out_kpts.append(kpts_head[i](output) + ref_kpts)
 
             elif i == self.eval_idx:
                 dec_out_logits.append(score_head[i](output))
                 dec_out_bboxes.append(inter_ref_bbox)
-                dec_out_radian.append(inter_ref_radian)
+                dec_out_rad.append(inter_ref_rad)
+                dec_out_kpts.append(inter_ref_kpts)
 
             ref_points = inter_ref_bbox
             ref_points_detach = inter_ref_bbox.detach(
             ) if self.training else inter_ref_bbox
             
-            ref_radian = inter_ref_radian
-            ref_radian_detach = inter_ref_radian.detach(
-            ) if self.training else inter_ref_radian
+            ref_rad = inter_ref_rad
+            ref_rad_detach = inter_ref_rad.detach(
+            ) if self.training else inter_ref_rad
+            
+            ref_kpts = inter_ref_kpts
+            ref_kpts_detach = inter_ref_kpts.detach(
+            ) if self.training else inter_ref_kpts
 
-        return paddle.stack(dec_out_bboxes), paddle.stack(dec_out_radian), paddle.stack(dec_out_logits)
+        return paddle.stack(dec_out_bboxes), paddle.stack(dec_out_rad), paddle.stack(dec_out_kpts), paddle.stack(dec_out_logits)
 
 
 

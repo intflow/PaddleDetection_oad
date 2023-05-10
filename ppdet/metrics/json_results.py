@@ -15,7 +15,7 @@ import six
 import numpy as np
 
 
-def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0, add_rad=False):
+def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0, add_rad=False, add_kpts=0):
     det_res = []
     k = 0
     for i in range(len(bbox_nums)):

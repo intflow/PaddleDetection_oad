@@ -28,7 +28,7 @@ from ppdet.utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 
-def get_infer_results(outs, catid, bias=0, add_rad=False):
+def get_infer_results(outs, catid, bias=0, add_rad=False, add_kpts=0):
     """
     Get result at the stage of inference.
     The output format is dictionary containing bbox or mask result.
@@ -50,7 +50,7 @@ def get_infer_results(outs, catid, bias=0, add_rad=False):
                 outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias)
         else:
             infer_res['bbox'] = get_det_res(
-                outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias, add_rad=add_rad)
+                outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias, add_rad=add_rad, add_kpts=add_kpts)
 
     if 'mask' in outs:
         # mask post process
@@ -79,7 +79,8 @@ def cocoapi_eval(jsonfile,
                  classwise=False,
                  sigmas=None,
                  use_area=True,
-                 add_rad=False):
+                 add_rad=False,
+                 add_kpts=0):
     """
     Args:
         jsonfile (str): Evaluation json file, eg: bbox.json, mask.json.
