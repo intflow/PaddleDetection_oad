@@ -798,6 +798,9 @@ class RandomFlip(BaseOperator):
         bbox[:, 2] = width - oldx1
         return bbox
 
+    def apply_rad(self, rad):
+        return rad * -1.0
+
     def apply(self, sample, context=None):
         """Filp the image and bounding box.
         Operators:
@@ -822,6 +825,8 @@ class RandomFlip(BaseOperator):
             if 'gt_keypoint' in sample and len(sample['gt_keypoint']) > 0:
                 sample['gt_keypoint'] = self.apply_keypoint(
                     sample['gt_keypoint'], width)
+            if 'gt_rad' in sample and len(sample['gt_rad']) > 0:
+                sample['gt_rad'] = self.apply_rad(sample['gt_rad'])
 
             if 'semantic' in sample and sample['semantic']:
                 sample['semantic'] = sample['semantic'][:, ::-1]

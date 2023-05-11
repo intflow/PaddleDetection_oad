@@ -7,10 +7,10 @@ _BASE_: [
 ]
 
 architecture: DETR
-weights: output/rtdetr_r50vd_6x_EFID2023/model_final
+weights: output/rtdetr_r50vd_6x_oad/model_final
 find_unused_parameters: True
 log_iter: 200
-epoch: 76
+epoch: 200
 add_rad: True
 
 TrainReader:
@@ -42,9 +42,9 @@ RTDETRTransformer_oad:
 DINOHEAD_oad:
   loss:
     name: DINOLoss_oad
-    loss_coeff: {class: 1, bbox: 5, giou: 2, rad: 1}
+    loss_coeff: {class: 1, bbox: 5, giou: 2, rad: 5}
     aux_loss: True
     use_vfl: True
     matcher:
       name: HungarianMatcher_oad
-      matcher_coeff: {class: 2, bbox: 5, giou: 2, rad: 1}
+      matcher_coeff: {class: 2, bbox: 5, giou: 2, rad: 5}
