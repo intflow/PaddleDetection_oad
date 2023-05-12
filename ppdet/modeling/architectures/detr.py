@@ -98,7 +98,7 @@ class DETR(BaseArch):
         else:
             preds = self.detr_head(out_transformer, body_feats)
             if self.exclude_post_process:
-                bbox, bbox_num, rad, mask = preds
+                bbox, bbox_num, mask = preds
             else:
                 bbox, bbox_num, mask = self.post_process(
                     preds, self.inputs['im_shape'], self.inputs['scale_factor'],
@@ -280,8 +280,9 @@ class DETR_oad_kpts(BaseArch):
         else:
             preds = self.detr_head(out_transformer, body_feats)
             if self.exclude_post_process:
-                bbox, bbox_num, rad, mask = preds
+                bbox, bbox_num, kpts, mask = preds
             else:
+                # REVIEW : pred를 mAP 계산할 수 있게 form을 변경해주는 역할
                 bbox, bbox_num, kpts, mask = self.post_process(
                     preds, self.inputs['im_shape'], self.inputs['scale_factor'],
                     paddle.shape(self.inputs['image'])[2:])

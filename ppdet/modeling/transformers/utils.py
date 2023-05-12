@@ -331,6 +331,7 @@ def get_contrastive_denoising_training_group(targets,
             rand_part_kpts *= rand_sign_kpts
             input_query_kpts += rand_part_kpts * diff_kpts3
             input_query_kpts.clip_(min=0.0, max=1.0)
+            input_query_kpts = inverse_sigmoid(input_query_kpts)
 
     class_embed = paddle.concat(
         [class_embed, paddle.zeros([1, class_embed.shape[-1]])])

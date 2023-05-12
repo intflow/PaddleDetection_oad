@@ -163,7 +163,7 @@ class OADDataSet(DetDataset):
                     x2 = cx + box_w * 0.5
                     y2 = cy + box_h * 0.5
                     eps = 1e-5
-                    # rbboxes.append(inst)
+                    
                     if inst['area'] > 0 and x2 - x1 > eps and y2 - y1 > eps:
                         inst['clean_bbox'] = [
                             round(float(x), 3) for x in [x1, y1, x2, y2]
@@ -307,5 +307,8 @@ class OADDataSet(DetDataset):
             h_tmp = height
             height = width
             width = h_tmp
+            
+        if rad < -0.25*np.pi or rad > 0.25*np.pi:
+            print("oad.py : rad ERROR")
             
         return [cx,cy,width,height,rad]

@@ -264,3 +264,42 @@ loading annotations into memory...
 Done (t=1.54s)
 creating index...
 index created!
+I0512 17:53:17.054307 59895 tcp_utils.cc:130] Successfully connected to 127.0.1.1:62095
+W0512 17:53:18.703802 59895 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 17:53:18.706395 59895 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 17:53:19,819] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=0.13s)
+creating index...
+index created!
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   squeeze_ad_func(paddle::experimental::Tensor const&, paddle::experimental::IntArrayBase<paddle::experimental::Tensor>)
+1   paddle::experimental::squeeze_intermediate(paddle::experimental::Tensor const&, paddle::experimental::IntArrayBase<paddle::experimental::Tensor> const&)
+2   paddle::experimental::PrepareData(paddle::experimental::Tensor const&, phi::TensorArgDef const&, paddle::experimental::TransformFlag const&)
+3   paddle::experimental::TransformData(phi::DenseTensor*, phi::TensorArgDef const&, paddle::experimental::TransformFlag const&)
+4   paddle::experimental::TransDataPlace(phi::DenseTensor const&, phi::Place)
+5   paddle::framework::TensorCopySync(phi::DenseTensor const&, phi::Place const&, phi::DenseTensor*)
+6   void paddle::memory::Copy<phi::Place, phi::Place>(phi::Place, void*, phi::Place, void const*, unsigned long, void*)
+7   void paddle::memory::Copy<phi::GPUPlace, phi::GPUPinnedPlace>(phi::GPUPlace, void*, phi::GPUPinnedPlace, void const*, unsigned long, void*)
+8   phi::backends::gpu::GpuMemcpySync(void*, void const*, unsigned long, cudaMemcpyKind)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683881802 (unix time) try "date -d @1683881802" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0xe991) received by PID 59895 (TID 0x7f8d9cfa3740) from PID 59793 ***]
+
+I0512 17:57:02.414628 65535 tcp_utils.cc:107] Retry to connect to 127.0.1.1:40018 while the server is not yet listening.
+I0512 17:57:05.415040 65535 tcp_utils.cc:130] Successfully connected to 127.0.1.1:40018
+W0512 17:57:07.042551 65535 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 17:57:07.045166 65535 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 17:57:07,611] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=1.56s)
+creating index...
+index created!

@@ -545,7 +545,7 @@ class RTDETRTransformer(nn.Layer):
 
         return target, reference_points_unact, enc_topk_bboxes, enc_topk_logits
 
-# ANCHOR : intflow decoder
+# ANCHOR : intflow decoder (oad)
 class TransformerDecoder_oad(nn.Layer):
     def __init__(self, hidden_dim, decoder_layer, num_layers, eval_idx=-1):
         super(TransformerDecoder_oad, self).__init__()
@@ -612,7 +612,6 @@ class TransformerDecoder_oad(nn.Layer):
 
         return paddle.stack(dec_out_bboxes), paddle.stack(dec_out_rad), paddle.stack(dec_out_logits)
 
-# ANCHOR : intflow
 @register
 class RTDETRTransformer_oad(nn.Layer):
     __shared__ = ['num_classes', 'hidden_dim', 'eval_size']
@@ -690,7 +689,7 @@ class RTDETRTransformer_oad(nn.Layer):
                 bias_attr=ParamAttr(regularizer=L2Decay(0.0))))
         self.enc_score_head = nn.Linear(hidden_dim, num_classes)
         self.enc_bbox_head = MLP(hidden_dim, hidden_dim, 4, num_layers=3)
-        self.enc_rad_head = MLP(hidden_dim, hidden_dim, 1, num_layers=1)
+        self.enc_rad_head = MLP(hidden_dim, hidden_dim, 1, num_layers=3)
 
         # decoder head
         self.dec_score_head = nn.LayerList([
@@ -702,13 +701,12 @@ class RTDETRTransformer_oad(nn.Layer):
             for _ in range(num_decoder_layers)
         ])
         self.dec_rad_head = nn.LayerList([
-            MLP(hidden_dim, hidden_dim, 1, num_layers=1)
+            MLP(hidden_dim, hidden_dim, 1, num_layers=3)
             for _ in range(num_decoder_layers)
         ])
 
         self._reset_parameters()
 
-    # FIXME : self.dec_rad_head
     def _reset_parameters(self):
         # class and bbox head init
         bias_cls = bias_init_with_prob(0.01)
@@ -818,7 +816,6 @@ class RTDETRTransformer_oad(nn.Layer):
         else:
             denoising_class, denoising_bbox_unact, denoising_rad, attn_mask, dn_meta = None, None, None, None, None
 
-        # FIXME Chnage
         target, init_ref_points_unact, enc_topk_bboxes, init_ref_rad, enc_topk_rad, enc_topk_logits = \
             self._get_decoder_input(
             memory, spatial_shapes, denoising_class, denoising_bbox_unact, denoising_rad)
@@ -935,7 +932,7 @@ class RTDETRTransformer_oad(nn.Layer):
 
 # ---------------------------------------------------------------------
 
-# ANCHOR : intflow decoder
+# ANCHOR : intflow decoder (oad_kpts)
 class TransformerDecoder_oad_kpts(nn.Layer):
     def __init__(self, hidden_dim, decoder_layer, num_layers, eval_idx=-1):
         super(TransformerDecoder_oad_kpts, self).__init__()
@@ -982,8 +979,9 @@ class TransformerDecoder_oad_kpts(nn.Layer):
             
             inter_ref_rad = rad_head[i](output) + ref_rad_detach
             
-            # FIXME : rad와 똑같이 layer 했으나, bbox랑 맞춰야 하지 않을까?
-            inter_ref_kpts = kpts_head[i](output) + ref_kpts_detach
+            # REVIEW : rad와 똑같이 layer 했으나, bbox랑 맞춰야 하지 않을까?
+            # inter_ref_kpts = kpts_head[i](output) + ref_kpts_detach
+            inter_ref_kpts = F.sigmoid(kpts_head[i](output) + inverse_sigmoid(ref_kpts_detach))
 
             if self.training:
                 dec_out_logits.append(score_head[i](output))
@@ -997,7 +995,10 @@ class TransformerDecoder_oad_kpts(nn.Layer):
                         F.sigmoid(bbox_head[i](output) + inverse_sigmoid(
                             ref_points)))
                     dec_out_rad.append(rad_head[i](output) + ref_rad)
-                    dec_out_kpts.append(kpts_head[i](output) + ref_kpts)
+                    # REVIEW : 위와 마찬가지로 bbox 형태와 동일하게 맞춤
+                    dec_out_kpts.append(
+                        F.sigmoid(kpts_head[i](output) + inverse_sigmoid(
+                            ref_kpts)))
 
             elif i == self.eval_idx:
                 dec_out_logits.append(score_head[i](output))
@@ -1101,7 +1102,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
                 bias_attr=ParamAttr(regularizer=L2Decay(0.0))))
         self.enc_score_head = nn.Linear(hidden_dim, num_classes)
         self.enc_bbox_head = MLP(hidden_dim, hidden_dim, 4, num_layers=3)
-        self.enc_rad_head = MLP(hidden_dim, hidden_dim, 1, num_layers=1)
+        self.enc_rad_head = MLP(hidden_dim, hidden_dim, 1, num_layers=3)
         self.enc_kpts_head = MLP(hidden_dim, hidden_dim, out_kpts_num*2, num_layers=3)
         self.enc_kpts_score_head = nn.Linear(hidden_dim, out_kpts_num)
 
@@ -1115,7 +1116,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
             for _ in range(num_decoder_layers)
         ])
         self.dec_rad_head = nn.LayerList([
-            MLP(hidden_dim, hidden_dim, 1, num_layers=1)
+            MLP(hidden_dim, hidden_dim, 1, num_layers=3)
             for _ in range(num_decoder_layers)
         ])
         self.dec_kpts_head = nn.LayerList([
@@ -1129,7 +1130,6 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
 
         self._reset_parameters()
 
-    # FIXME : self.dec_rad_head
     def _reset_parameters(self):
         # class and bbox head init
         bias_cls = bias_init_with_prob(0.01)

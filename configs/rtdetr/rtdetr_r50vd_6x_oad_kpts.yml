@@ -10,16 +10,13 @@ architecture: DETR_oad_kpts
 weights: output/rtdetr_r50vd_6x_oad_kpts/model_final
 find_unused_parameters: True
 log_iter: 200
-epoch: 100
+epoch: 50
 add_rad: True
 add_kpts: True
 
 TrainReader:
   sample_transforms:
     - Decode: {}
-    - RandomDistort: {prob: 0.8}
-    - RandomExpand: {fill_value: [123.675, 116.28, 103.53]}
-    - RandomCrop: {prob: 0.8}
   batch_size: 8
 
 DETR_oad_kpts:
