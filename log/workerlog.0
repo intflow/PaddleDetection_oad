@@ -1731,3 +1731,765 @@ FatalError: `Termination signal` is detected by the operating system.
   [TimeInfo: *** Aborted at 1683867777 (unix time) try "date -d @1683867777" if you are using GNU date ***]
   [SignalInfo: *** SIGTERM (@0x5da5) received by PID 24067 (TID 0x7f41a76c7740) from PID 23973 ***]
 
+I0512 15:07:55.152462 35051 tcp_utils.cc:181] The server starts to listen on IP_ANY:37281
+I0512 15:07:55.152637 35051 tcp_utils.cc:130] Successfully connected to 127.0.1.1:37281
+W0512 15:07:56.140717 35051 gpu_resources.cc:61] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 15:07:56.143179 35051 gpu_resources.cc:91] device: 0, cuDNN Version: 8.2.
+[2023-05-12 15:07:59,215] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 0, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [0],  sharding_group: [0], pp_group: [0], dp_group: [0, 1], check/clip group: [0]
+loading annotations into memory...
+Done (t=1.54s)
+creating index...
+index created!
+[05/12 15:08:06] ppdet.data.source.oad INFO: Load [10559 samples valid, 3545 samples invalid] in file /DL_data_super_ssd/EFID2023/new_hallway/train/json/annotation.json.
+[05/12 15:08:09] ppdet.utils.checkpoint INFO: Finish loading model weights: /root/.cache/paddle/weights/ResNet50_vd_ssld_v2_pretrained.pdparams
+[05/12 15:08:12] ppdet.engine INFO: Epoch: [0] [  0/660] learning_rate: 0.000000 loss_class: 0.366470 loss_bbox: 1.065230 loss_giou: 1.578979 loss_rad: 0.172323 loss_kpts: 0.955297 loss_class_aux: 2.419825 loss_bbox_aux: 6.394706 loss_giou_aux: 9.527305 loss_rad_aux: 0.701248 loss_kpts_aux: 5.731781 loss_class_dn: 0.593878 loss_bbox_dn: 0.708739 loss_giou_dn: 1.348486 loss_rad_dn: 0.182413 loss_kpts_dn: 0.955763 loss_class_aux_dn: 3.495646 loss_bbox_aux_dn: 3.543694 loss_giou_aux_dn: 6.742428 loss_rad_aux_dn: 0.722764 loss_kpts_aux_dn: 4.778816 loss: 51.985790 eta: 1 day, 20:56:03 batch_cost: 2.4510 data_cost: 0.0003 ips: 3.2640 images/s
+[05/12 15:10:36] ppdet.engine INFO: Epoch: [0] [200/660] learning_rate: 0.000010 loss_class: 0.299910 loss_bbox: 0.890209 loss_giou: 1.596673 loss_rad: 0.103277 loss_kpts: 0.970058 loss_class_aux: 2.067028 loss_bbox_aux: 5.421560 loss_giou_aux: 9.752172 loss_rad_aux: 0.520953 loss_kpts_aux: 5.824244 loss_class_dn: 0.467726 loss_bbox_dn: 0.638877 loss_giou_dn: 1.399969 loss_rad_dn: 0.076455 loss_kpts_dn: 0.968501 loss_class_aux_dn: 2.659736 loss_bbox_aux_dn: 3.166466 loss_giou_aux_dn: 6.994912 loss_rad_aux_dn: 0.262152 loss_kpts_aux_dn: 4.845643 loss: 49.632904 eta: 12:40:29 batch_cost: 0.6847 data_cost: 0.0004 ips: 11.6845 images/s
+[05/12 15:13:04] ppdet.engine INFO: Epoch: [0] [400/660] learning_rate: 0.000020 loss_class: 0.620684 loss_bbox: 0.621215 loss_giou: 1.121919 loss_rad: 0.068654 loss_kpts: 0.970796 loss_class_aux: 3.521516 loss_bbox_aux: 3.901872 loss_giou_aux: 6.876489 loss_rad_aux: 0.331999 loss_kpts_aux: 5.829767 loss_class_dn: 0.361523 loss_bbox_dn: 0.636648 loss_giou_dn: 1.375562 loss_rad_dn: 0.042843 loss_kpts_dn: 0.966336 loss_class_aux_dn: 1.706244 loss_bbox_aux_dn: 3.206586 loss_giou_aux_dn: 6.913836 loss_rad_aux_dn: 0.106506 loss_kpts_aux_dn: 4.830949 loss: 45.517769 eta: 12:42:01 batch_cost: 0.7005 data_cost: 0.0004 ips: 11.4202 images/s
+[05/12 15:15:32] ppdet.engine INFO: Epoch: [0] [600/660] learning_rate: 0.000030 loss_class: 0.818702 loss_bbox: 0.358990 loss_giou: 0.827019 loss_rad: 0.048503 loss_kpts: 0.971427 loss_class_aux: 4.188326 loss_bbox_aux: 2.607228 loss_giou_aux: 5.420745 loss_rad_aux: 0.274879 loss_kpts_aux: 5.821896 loss_class_dn: 0.390727 loss_bbox_dn: 0.478344 loss_giou_dn: 1.179610 loss_rad_dn: 0.023857 loss_kpts_dn: 0.965616 loss_class_aux_dn: 1.859498 loss_bbox_aux_dn: 2.552907 loss_giou_aux_dn: 6.194248 loss_rad_aux_dn: 0.072713 loss_kpts_aux_dn: 4.832370 loss: 40.978424 eta: 12:42:47 batch_cost: 0.7055 data_cost: 0.0004 ips: 11.3398 images/s
+[05/12 15:16:19] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 15:16:19] ppdet.data.source.oad INFO: Load [733 samples valid, 0 samples invalid] in file /DL_data_super_ssd/EFID2023/new_hallway/val/json/annotation.json.
+loading annotations into memory...
+Done (t=0.17s)
+creating index...
+index created!
+[05/12 15:16:20] ppdet.engine INFO: Eval iter: 0
+[05/12 15:16:31] ppdet.engine INFO: Eval iter: 100
+[05/12 15:16:42] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.19s)
+creating index...
+index created!
+[05/12 15:16:42] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.60s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=7.55s).
+Accumulating evaluation results...
+DONE (t=0.45s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.120
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.214
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.125
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.055
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.105
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.136
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.056
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.198
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.489
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.243
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.409
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.554
+[05/12 15:16:51] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 15:16:51] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.022
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.048
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.020
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.057
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.033
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.066
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.032
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.001
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.051
+[05/12 15:16:51] ppdet.engine INFO: Total sample number: 733, average FPS: 35.23458627659248
+[05/12 15:16:51] ppdet.engine INFO: Best test bbox + keypoint ap is 0.091.
+[05/12 15:16:52] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:16:53] ppdet.engine INFO: Epoch: [1] [  0/660] learning_rate: 0.000033 loss_class: 0.899058 loss_bbox: 0.292116 loss_giou: 0.693281 loss_rad: 0.050276 loss_kpts: 0.968792 loss_class_aux: 4.540074 loss_bbox_aux: 2.277489 loss_giou_aux: 4.806849 loss_rad_aux: 0.270544 loss_kpts_aux: 5.821595 loss_class_dn: 0.423707 loss_bbox_dn: 0.456802 loss_giou_dn: 1.024776 loss_rad_dn: 0.022355 loss_kpts_dn: 0.965121 loss_class_aux_dn: 1.963488 loss_bbox_aux_dn: 2.471180 loss_giou_aux_dn: 5.553300 loss_rad_aux_dn: 0.070265 loss_kpts_aux_dn: 4.823082 loss: 39.020130 eta: 12:42:26 batch_cost: 0.7001 data_cost: 0.0004 ips: 11.4268 images/s
+[05/12 15:19:17] ppdet.engine INFO: Epoch: [1] [200/660] learning_rate: 0.000043 loss_class: 0.935689 loss_bbox: 0.235526 loss_giou: 0.597798 loss_rad: 0.046718 loss_kpts: 0.963076 loss_class_aux: 4.622521 loss_bbox_aux: 1.809919 loss_giou_aux: 4.102060 loss_rad_aux: 0.248759 loss_kpts_aux: 5.793661 loss_class_dn: 0.435548 loss_bbox_dn: 0.415094 loss_giou_dn: 0.817659 loss_rad_dn: 0.022366 loss_kpts_dn: 0.961233 loss_class_aux_dn: 2.039668 loss_bbox_aux_dn: 2.277533 loss_giou_aux_dn: 4.616213 loss_rad_aux_dn: 0.060461 loss_kpts_aux_dn: 4.807720 loss: 36.292633 eta: 12:36:30 batch_cost: 0.6859 data_cost: 0.0004 ips: 11.6640 images/s
+[05/12 15:21:43] ppdet.engine INFO: Epoch: [1] [400/660] learning_rate: 0.000053 loss_class: 0.951019 loss_bbox: 0.205130 loss_giou: 0.605496 loss_rad: 0.038505 loss_kpts: 0.968903 loss_class_aux: 5.018308 loss_bbox_aux: 1.434131 loss_giou_aux: 3.990777 loss_rad_aux: 0.238952 loss_kpts_aux: 5.823478 loss_class_dn: 0.460660 loss_bbox_dn: 0.327299 loss_giou_dn: 0.801138 loss_rad_dn: 0.016371 loss_kpts_dn: 0.967833 loss_class_aux_dn: 2.256977 loss_bbox_aux_dn: 1.866738 loss_giou_aux_dn: 4.471345 loss_rad_aux_dn: 0.049596 loss_kpts_aux_dn: 4.841452 loss: 35.634575 eta: 12:33:08 batch_cost: 0.6917 data_cost: 0.0004 ips: 11.5661 images/s
+[05/12 15:24:10] ppdet.engine INFO: Epoch: [1] [600/660] learning_rate: 0.000063 loss_class: 0.893381 loss_bbox: 0.182257 loss_giou: 0.542335 loss_rad: 0.037695 loss_kpts: 0.961044 loss_class_aux: 4.853621 loss_bbox_aux: 1.202896 loss_giou_aux: 3.543947 loss_rad_aux: 0.214444 loss_kpts_aux: 5.797667 loss_class_dn: 0.443284 loss_bbox_dn: 0.287248 loss_giou_dn: 0.704296 loss_rad_dn: 0.017324 loss_kpts_dn: 0.964385 loss_class_aux_dn: 2.213358 loss_bbox_aux_dn: 1.660464 loss_giou_aux_dn: 3.958013 loss_rad_aux_dn: 0.050378 loss_kpts_aux_dn: 4.824742 loss: 34.122654 eta: 12:31:24 batch_cost: 0.6993 data_cost: 0.0006 ips: 11.4403 images/s
+[05/12 15:24:56] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:24:56] ppdet.engine INFO: Eval iter: 0
+[05/12 15:25:07] ppdet.engine INFO: Eval iter: 100
+[05/12 15:25:18] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.06s)
+creating index...
+index created!
+[05/12 15:25:18] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.61s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=7.05s).
+Accumulating evaluation results...
+DONE (t=0.45s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.393
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.577
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.462
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.218
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.385
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.078
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.354
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.670
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.429
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.604
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.727
+[05/12 15:25:26] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 15:25:26] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.12s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.055
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.008
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.001
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.040
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.034
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.076
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.027
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.003
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.052
+[05/12 15:25:27] ppdet.engine INFO: Total sample number: 733, average FPS: 34.97781987935776
+[05/12 15:25:27] ppdet.engine INFO: Best test bbox + keypoint ap is 0.281.
+[05/12 15:25:28] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:25:29] ppdet.engine INFO: Epoch: [2] [  0/660] learning_rate: 0.000066 loss_class: 0.889410 loss_bbox: 0.180330 loss_giou: 0.527370 loss_rad: 0.038184 loss_kpts: 0.959732 loss_class_aux: 4.852871 loss_bbox_aux: 1.187529 loss_giou_aux: 3.429430 loss_rad_aux: 0.212980 loss_kpts_aux: 5.780546 loss_class_dn: 0.449151 loss_bbox_dn: 0.281411 loss_giou_dn: 0.693845 loss_rad_dn: 0.018350 loss_kpts_dn: 0.964337 loss_class_aux_dn: 2.241711 loss_bbox_aux_dn: 1.618406 loss_giou_aux_dn: 3.901673 loss_rad_aux_dn: 0.049967 loss_kpts_aux_dn: 4.822443 loss: 33.544025 eta: 12:30:54 batch_cost: 0.7028 data_cost: 0.0006 ips: 11.3826 images/s
+[05/12 15:27:51] ppdet.engine INFO: Epoch: [2] [200/660] learning_rate: 0.000076 loss_class: 0.908497 loss_bbox: 0.183681 loss_giou: 0.511565 loss_rad: 0.036925 loss_kpts: 0.951016 loss_class_aux: 4.949525 loss_bbox_aux: 1.231905 loss_giou_aux: 3.298907 loss_rad_aux: 0.187861 loss_kpts_aux: 5.743869 loss_class_dn: 0.448674 loss_bbox_dn: 0.258487 loss_giou_dn: 0.642971 loss_rad_dn: 0.019104 loss_kpts_dn: 0.964487 loss_class_aux_dn: 2.256353 loss_bbox_aux_dn: 1.500719 loss_giou_aux_dn: 3.563148 loss_rad_aux_dn: 0.048360 loss_kpts_aux_dn: 4.822554 loss: 32.989967 eta: 12:25:39 batch_cost: 0.6758 data_cost: 0.0005 ips: 11.8372 images/s
+[05/12 15:30:16] ppdet.engine INFO: Epoch: [2] [400/660] learning_rate: 0.000086 loss_class: 0.914464 loss_bbox: 0.208641 loss_giou: 0.555925 loss_rad: 0.037439 loss_kpts: 0.945401 loss_class_aux: 5.069481 loss_bbox_aux: 1.337969 loss_giou_aux: 3.422320 loss_rad_aux: 0.187576 loss_kpts_aux: 5.699296 loss_class_dn: 0.451393 loss_bbox_dn: 0.241132 loss_giou_dn: 0.597097 loss_rad_dn: 0.017838 loss_kpts_dn: 0.963659 loss_class_aux_dn: 2.247355 loss_bbox_aux_dn: 1.373143 loss_giou_aux_dn: 3.423101 loss_rad_aux_dn: 0.046748 loss_kpts_aux_dn: 4.823791 loss: 32.646473 eta: 12:22:10 batch_cost: 0.6845 data_cost: 0.0005 ips: 11.6867 images/s
+[05/12 15:32:42] ppdet.engine INFO: Epoch: [2] [600/660] learning_rate: 0.000096 loss_class: 0.921949 loss_bbox: 0.216826 loss_giou: 0.559160 loss_rad: 0.030235 loss_kpts: 0.942268 loss_class_aux: 5.171067 loss_bbox_aux: 1.359232 loss_giou_aux: 3.534828 loss_rad_aux: 0.165670 loss_kpts_aux: 5.664027 loss_class_dn: 0.454843 loss_bbox_dn: 0.217459 loss_giou_dn: 0.583195 loss_rad_dn: 0.013855 loss_kpts_dn: 0.963207 loss_class_aux_dn: 2.321088 loss_bbox_aux_dn: 1.264313 loss_giou_aux_dn: 3.335347 loss_rad_aux_dn: 0.039640 loss_kpts_aux_dn: 4.826030 loss: 33.123962 eta: 12:19:30 batch_cost: 0.6896 data_cost: 0.0005 ips: 11.6014 images/s
+[05/12 15:33:27] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:33:27] ppdet.engine INFO: Eval iter: 0
+[05/12 15:33:38] ppdet.engine INFO: Eval iter: 100
+[05/12 15:33:47] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.18s)
+creating index...
+index created!
+[05/12 15:33:48] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.59s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.90s).
+Accumulating evaluation results...
+DONE (t=0.44s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.468
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.629
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.557
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.342
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.472
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.490
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.084
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.400
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.723
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.506
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.662
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.776
+[05/12 15:33:56] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 15:33:56] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.016
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.052
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.004
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.004
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.030
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.028
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.068
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.018
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.006
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.042
+[05/12 15:33:56] ppdet.engine INFO: Total sample number: 733, average FPS: 38.30420100024438
+[05/12 15:33:56] ppdet.engine INFO: Best test bbox + keypoint ap is 0.332.
+[05/12 15:33:57] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:33:58] ppdet.engine INFO: Epoch: [3] [  0/660] learning_rate: 0.000099 loss_class: 0.915577 loss_bbox: 0.226216 loss_giou: 0.583183 loss_rad: 0.032656 loss_kpts: 0.939049 loss_class_aux: 5.162466 loss_bbox_aux: 1.371176 loss_giou_aux: 3.593705 loss_rad_aux: 0.166935 loss_kpts_aux: 5.628402 loss_class_dn: 0.447785 loss_bbox_dn: 0.213824 loss_giou_dn: 0.583195 loss_rad_dn: 0.013629 loss_kpts_dn: 0.962092 loss_class_aux_dn: 2.244969 loss_bbox_aux_dn: 1.260663 loss_giou_aux_dn: 3.327560 loss_rad_aux_dn: 0.039812 loss_kpts_aux_dn: 4.816346 loss: 33.123962 eta: 12:18:52 batch_cost: 0.6925 data_cost: 0.0005 ips: 11.5531 images/s
+[05/12 15:36:25] ppdet.engine INFO: Epoch: [3] [200/660] learning_rate: 0.000100 loss_class: 0.886980 loss_bbox: 0.195175 loss_giou: 0.588316 loss_rad: 0.033437 loss_kpts: 0.937283 loss_class_aux: 5.000338 loss_bbox_aux: 1.261900 loss_giou_aux: 3.712867 loss_rad_aux: 0.161256 loss_kpts_aux: 5.654834 loss_class_dn: 0.454706 loss_bbox_dn: 0.211048 loss_giou_dn: 0.578186 loss_rad_dn: 0.013673 loss_kpts_dn: 0.960913 loss_class_aux_dn: 2.305382 loss_bbox_aux_dn: 1.211174 loss_giou_aux_dn: 3.335608 loss_rad_aux_dn: 0.038731 loss_kpts_aux_dn: 4.810903 loss: 33.011169 eta: 12:16:52 batch_cost: 0.6956 data_cost: 0.0005 ips: 11.5002 images/s
+[05/12 15:38:49] ppdet.engine INFO: Epoch: [3] [400/660] learning_rate: 0.000100 loss_class: 0.866442 loss_bbox: 0.183391 loss_giou: 0.490873 loss_rad: 0.027756 loss_kpts: 0.932088 loss_class_aux: 4.810371 loss_bbox_aux: 1.223880 loss_giou_aux: 3.118848 loss_rad_aux: 0.143247 loss_kpts_aux: 5.635190 loss_class_dn: 0.443857 loss_bbox_dn: 0.196602 loss_giou_dn: 0.494538 loss_rad_dn: 0.012407 loss_kpts_dn: 0.961398 loss_class_aux_dn: 2.234717 loss_bbox_aux_dn: 1.158499 loss_giou_aux_dn: 2.889050 loss_rad_aux_dn: 0.035041 loss_kpts_aux_dn: 4.807046 loss: 31.442646 eta: 12:13:58 batch_cost: 0.6862 data_cost: 0.0005 ips: 11.6584 images/s
+[05/12 15:41:16] ppdet.engine INFO: Epoch: [3] [600/660] learning_rate: 0.000100 loss_class: 0.853001 loss_bbox: 0.172334 loss_giou: 0.527551 loss_rad: 0.030012 loss_kpts: 0.938318 loss_class_aux: 4.699030 loss_bbox_aux: 1.234771 loss_giou_aux: 3.366174 loss_rad_aux: 0.146403 loss_kpts_aux: 5.632514 loss_class_dn: 0.418610 loss_bbox_dn: 0.190466 loss_giou_dn: 0.489658 loss_rad_dn: 0.014646 loss_kpts_dn: 0.959204 loss_class_aux_dn: 2.163350 loss_bbox_aux_dn: 1.110585 loss_giou_aux_dn: 2.846840 loss_rad_aux_dn: 0.034260 loss_kpts_aux_dn: 4.805154 loss: 30.824842 eta: 12:11:58 batch_cost: 0.6959 data_cost: 0.0005 ips: 11.4962 images/s
+[05/12 15:42:01] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:42:02] ppdet.engine INFO: Eval iter: 0
+[05/12 15:42:13] ppdet.engine INFO: Eval iter: 100
+[05/12 15:42:23] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 15:42:23] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.61s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.77s).
+Accumulating evaluation results...
+DONE (t=0.45s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.456
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.620
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.540
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.331
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.453
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.480
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.085
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.407
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.743
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.545
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.689
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.791
+[05/12 15:42:31] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.17s)
+creating index...
+index created!
+[05/12 15:42:31] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.30s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.007
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.022
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.016
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.021
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.048
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.016
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.033
+[05/12 15:42:32] ppdet.engine INFO: Total sample number: 733, average FPS: 35.80796551915511
+[05/12 15:42:32] ppdet.engine INFO: Epoch: [4] [  0/660] learning_rate: 0.000100 loss_class: 0.871851 loss_bbox: 0.175206 loss_giou: 0.541653 loss_rad: 0.032035 loss_kpts: 0.935710 loss_class_aux: 4.877835 loss_bbox_aux: 1.210314 loss_giou_aux: 3.366174 loss_rad_aux: 0.147310 loss_kpts_aux: 5.630197 loss_class_dn: 0.420702 loss_bbox_dn: 0.185738 loss_giou_dn: 0.501581 loss_rad_dn: 0.015526 loss_kpts_dn: 0.960126 loss_class_aux_dn: 2.134607 loss_bbox_aux_dn: 1.091847 loss_giou_aux_dn: 2.887958 loss_rad_aux_dn: 0.036039 loss_kpts_aux_dn: 4.804817 loss: 30.839434 eta: 12:11:16 batch_cost: 0.6963 data_cost: 0.0005 ips: 11.4892 images/s
+[05/12 15:44:57] ppdet.engine INFO: Epoch: [4] [200/660] learning_rate: 0.000100 loss_class: 0.838038 loss_bbox: 0.210249 loss_giou: 0.594631 loss_rad: 0.028371 loss_kpts: 0.931295 loss_class_aux: 4.659570 loss_bbox_aux: 1.293468 loss_giou_aux: 3.691693 loss_rad_aux: 0.140821 loss_kpts_aux: 5.619801 loss_class_dn: 0.430057 loss_bbox_dn: 0.169310 loss_giou_dn: 0.515317 loss_rad_dn: 0.009773 loss_kpts_dn: 0.958021 loss_class_aux_dn: 2.169210 loss_bbox_aux_dn: 0.987964 loss_giou_aux_dn: 2.923688 loss_rad_aux_dn: 0.030215 loss_kpts_aux_dn: 4.790187 loss: 31.551697 eta: 12:08:33 batch_cost: 0.6871 data_cost: 0.0005 ips: 11.6430 images/s
+[05/12 15:47:21] ppdet.engine INFO: Epoch: [4] [400/660] learning_rate: 0.000100 loss_class: 0.823722 loss_bbox: 0.206476 loss_giou: 0.566412 loss_rad: 0.028818 loss_kpts: 0.932678 loss_class_aux: 4.640991 loss_bbox_aux: 1.438246 loss_giou_aux: 3.557236 loss_rad_aux: 0.138158 loss_kpts_aux: 5.622843 loss_class_dn: 0.410694 loss_bbox_dn: 0.180473 loss_giou_dn: 0.463990 loss_rad_dn: 0.011332 loss_kpts_dn: 0.958152 loss_class_aux_dn: 2.117780 loss_bbox_aux_dn: 1.030262 loss_giou_aux_dn: 2.690152 loss_rad_aux_dn: 0.032399 loss_kpts_aux_dn: 4.791501 loss: 31.227604 eta: 12:05:38 batch_cost: 0.6833 data_cost: 0.0006 ips: 11.7077 images/s
+[05/12 15:49:45] ppdet.engine INFO: Epoch: [4] [600/660] learning_rate: 0.000100 loss_class: 0.868123 loss_bbox: 0.201172 loss_giou: 0.579044 loss_rad: 0.025848 loss_kpts: 0.927808 loss_class_aux: 4.895237 loss_bbox_aux: 1.337106 loss_giou_aux: 3.652091 loss_rad_aux: 0.131597 loss_kpts_aux: 5.603161 loss_class_dn: 0.427430 loss_bbox_dn: 0.169729 loss_giou_dn: 0.451848 loss_rad_dn: 0.010769 loss_kpts_dn: 0.958963 loss_class_aux_dn: 2.194935 loss_bbox_aux_dn: 1.000516 loss_giou_aux_dn: 2.548631 loss_rad_aux_dn: 0.029147 loss_kpts_aux_dn: 4.791528 loss: 30.849152 eta: 12:02:46 batch_cost: 0.6828 data_cost: 0.0005 ips: 11.7164 images/s
+[05/12 15:50:31] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:50:31] ppdet.engine INFO: Eval iter: 0
+[05/12 15:50:42] ppdet.engine INFO: Eval iter: 100
+[05/12 15:50:53] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.18s)
+creating index...
+index created!
+[05/12 15:50:53] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.59s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.63s).
+Accumulating evaluation results...
+DONE (t=0.44s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.623
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.824
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.732
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.438
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.570
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.667
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.090
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.465
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.762
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.615
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.709
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.804
+[05/12 15:51:01] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 15:51:01] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.007
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.025
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.014
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.020
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.047
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.015
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.005
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.029
+[05/12 15:51:01] ppdet.engine INFO: Total sample number: 733, average FPS: 35.400854813658675
+[05/12 15:51:01] ppdet.engine INFO: Best test bbox + keypoint ap is 0.438.
+[05/12 15:51:02] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:51:03] ppdet.engine INFO: Epoch: [5] [  0/660] learning_rate: 0.000100 loss_class: 0.830842 loss_bbox: 0.189312 loss_giou: 0.554367 loss_rad: 0.024873 loss_kpts: 0.933661 loss_class_aux: 4.722394 loss_bbox_aux: 1.309489 loss_giou_aux: 3.584949 loss_rad_aux: 0.130064 loss_kpts_aux: 5.612540 loss_class_dn: 0.411275 loss_bbox_dn: 0.155634 loss_giou_dn: 0.440273 loss_rad_dn: 0.009604 loss_kpts_dn: 0.956971 loss_class_aux_dn: 2.112574 loss_bbox_aux_dn: 0.932258 loss_giou_aux_dn: 2.494412 loss_rad_aux_dn: 0.027590 loss_kpts_aux_dn: 4.794080 loss: 30.307526 eta: 12:02:05 batch_cost: 0.6867 data_cost: 0.0006 ips: 11.6507 images/s
+[05/12 15:53:28] ppdet.engine INFO: Epoch: [5] [200/660] learning_rate: 0.000100 loss_class: 0.853474 loss_bbox: 0.201712 loss_giou: 0.544050 loss_rad: 0.023403 loss_kpts: 0.924297 loss_class_aux: 4.808692 loss_bbox_aux: 1.316779 loss_giou_aux: 3.455356 loss_rad_aux: 0.128573 loss_kpts_aux: 5.565742 loss_class_dn: 0.422445 loss_bbox_dn: 0.160201 loss_giou_dn: 0.442194 loss_rad_dn: 0.007642 loss_kpts_dn: 0.956849 loss_class_aux_dn: 2.173688 loss_bbox_aux_dn: 0.944883 loss_giou_aux_dn: 2.544164 loss_rad_aux_dn: 0.024066 loss_kpts_aux_dn: 4.776797 loss: 30.961563 eta: 11:59:28 batch_cost: 0.6856 data_cost: 0.0005 ips: 11.6682 images/s
+[05/12 15:55:53] ppdet.engine INFO: Epoch: [5] [400/660] learning_rate: 0.000100 loss_class: 0.923450 loss_bbox: 0.190921 loss_giou: 0.565746 loss_rad: 0.029024 loss_kpts: 0.924657 loss_class_aux: 5.129331 loss_bbox_aux: 1.356523 loss_giou_aux: 3.771639 loss_rad_aux: 0.147391 loss_kpts_aux: 5.554075 loss_class_dn: 0.418330 loss_bbox_dn: 0.163284 loss_giou_dn: 0.456573 loss_rad_dn: 0.010069 loss_kpts_dn: 0.953519 loss_class_aux_dn: 2.139190 loss_bbox_aux_dn: 0.947620 loss_giou_aux_dn: 2.639342 loss_rad_aux_dn: 0.026729 loss_kpts_aux_dn: 4.761529 loss: 31.709902 eta: 11:57:03 batch_cost: 0.6887 data_cost: 0.0005 ips: 11.6161 images/s
+[05/12 15:58:19] ppdet.engine INFO: Epoch: [5] [600/660] learning_rate: 0.000100 loss_class: 0.891426 loss_bbox: 0.172151 loss_giou: 0.501890 loss_rad: 0.022997 loss_kpts: 0.935892 loss_class_aux: 5.128848 loss_bbox_aux: 1.243171 loss_giou_aux: 3.608188 loss_rad_aux: 0.128478 loss_kpts_aux: 5.628350 loss_class_dn: 0.420895 loss_bbox_dn: 0.151049 loss_giou_dn: 0.449507 loss_rad_dn: 0.008302 loss_kpts_dn: 0.960060 loss_class_aux_dn: 2.162566 loss_bbox_aux_dn: 0.864293 loss_giou_aux_dn: 2.561657 loss_rad_aux_dn: 0.025007 loss_kpts_aux_dn: 4.801889 loss: 31.145039 eta: 11:54:52 batch_cost: 0.6928 data_cost: 0.0005 ips: 11.5480 images/s
+[05/12 15:59:04] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 15:59:04] ppdet.engine INFO: Eval iter: 0
+[05/12 15:59:15] ppdet.engine INFO: Eval iter: 100
+[05/12 15:59:26] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.06s)
+creating index...
+index created!
+[05/12 15:59:26] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.59s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.74s).
+Accumulating evaluation results...
+DONE (t=0.44s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.611
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.801
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.715
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.404
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.537
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.669
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.090
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.467
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.766
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.594
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.709
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.812
+[05/12 15:59:34] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.17s)
+creating index...
+index created!
+[05/12 15:59:34] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.006
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.019
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.009
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.018
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.013
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.002
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.027
+[05/12 15:59:34] ppdet.engine INFO: Total sample number: 733, average FPS: 35.010141255054
+[05/12 15:59:35] ppdet.engine INFO: Epoch: [6] [  0/660] learning_rate: 0.000100 loss_class: 0.877992 loss_bbox: 0.167739 loss_giou: 0.457777 loss_rad: 0.021275 loss_kpts: 0.923600 loss_class_aux: 5.055501 loss_bbox_aux: 1.190067 loss_giou_aux: 3.178656 loss_rad_aux: 0.122565 loss_kpts_aux: 5.563497 loss_class_dn: 0.404764 loss_bbox_dn: 0.155670 loss_giou_dn: 0.434283 loss_rad_dn: 0.008153 loss_kpts_dn: 0.953349 loss_class_aux_dn: 2.095724 loss_bbox_aux_dn: 0.900468 loss_giou_aux_dn: 2.487386 loss_rad_aux_dn: 0.024322 loss_kpts_aux_dn: 4.764693 loss: 30.352028 eta: 11:54:02 batch_cost: 0.6864 data_cost: 0.0005 ips: 11.6552 images/s
+[05/12 16:02:00] ppdet.engine INFO: Epoch: [6] [200/660] learning_rate: 0.000100 loss_class: 0.851641 loss_bbox: 0.166733 loss_giou: 0.453313 loss_rad: 0.022618 loss_kpts: 0.929563 loss_class_aux: 4.847476 loss_bbox_aux: 1.243977 loss_giou_aux: 3.273524 loss_rad_aux: 0.124622 loss_kpts_aux: 5.579406 loss_class_dn: 0.402998 loss_bbox_dn: 0.147685 loss_giou_dn: 0.407867 loss_rad_dn: 0.008251 loss_kpts_dn: 0.955793 loss_class_aux_dn: 2.082209 loss_bbox_aux_dn: 0.843576 loss_giou_aux_dn: 2.328550 loss_rad_aux_dn: 0.024584 loss_kpts_aux_dn: 4.781551 loss: 29.853836 eta: 11:51:30 batch_cost: 0.6861 data_cost: 0.0005 ips: 11.6599 images/s
+[05/12 16:04:25] ppdet.engine INFO: Epoch: [6] [400/660] learning_rate: 0.000100 loss_class: 0.851058 loss_bbox: 0.158343 loss_giou: 0.469904 loss_rad: 0.024526 loss_kpts: 0.930956 loss_class_aux: 4.879520 loss_bbox_aux: 1.148511 loss_giou_aux: 3.185526 loss_rad_aux: 0.136423 loss_kpts_aux: 5.593373 loss_class_dn: 0.393684 loss_bbox_dn: 0.148255 loss_giou_dn: 0.417743 loss_rad_dn: 0.009731 loss_kpts_dn: 0.956313 loss_class_aux_dn: 2.059698 loss_bbox_aux_dn: 0.860694 loss_giou_aux_dn: 2.384971 loss_rad_aux_dn: 0.026188 loss_kpts_aux_dn: 4.774461 loss: 29.877506 eta: 11:49:12 batch_cost: 0.6904 data_cost: 0.0006 ips: 11.5882 images/s
+[05/12 16:06:52] ppdet.engine INFO: Epoch: [6] [600/660] learning_rate: 0.000100 loss_class: 0.847166 loss_bbox: 0.176014 loss_giou: 0.567498 loss_rad: 0.027684 loss_kpts: 0.930630 loss_class_aux: 4.772142 loss_bbox_aux: 1.384484 loss_giou_aux: 4.015277 loss_rad_aux: 0.147113 loss_kpts_aux: 5.590529 loss_class_dn: 0.421771 loss_bbox_dn: 0.154308 loss_giou_dn: 0.462464 loss_rad_dn: 0.009544 loss_kpts_dn: 0.954758 loss_class_aux_dn: 2.161569 loss_bbox_aux_dn: 0.888513 loss_giou_aux_dn: 2.610236 loss_rad_aux_dn: 0.026270 loss_kpts_aux_dn: 4.776098 loss: 31.923145 eta: 11:47:10 batch_cost: 0.6963 data_cost: 0.0005 ips: 11.4895 images/s
+[05/12 16:07:37] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:07:37] ppdet.engine INFO: Eval iter: 0
+[05/12 16:07:48] ppdet.engine INFO: Eval iter: 100
+[05/12 16:07:58] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.06s)
+creating index...
+index created!
+[05/12 16:07:58] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.59s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.64s).
+Accumulating evaluation results...
+DONE (t=0.44s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.624
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.816
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.728
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.431
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.549
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.683
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.092
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.477
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.775
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.624
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.717
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.819
+[05/12 16:08:06] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.16s)
+creating index...
+index created!
+[05/12 16:08:06] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.014
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.034
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.012
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.021
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.021
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.050
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.015
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.004
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.032
+[05/12 16:08:07] ppdet.engine INFO: Total sample number: 733, average FPS: 37.21095395266365
+[05/12 16:08:07] ppdet.engine INFO: Best test bbox + keypoint ap is 0.441.
+[05/12 16:08:08] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:08:09] ppdet.engine INFO: Epoch: [7] [  0/660] learning_rate: 0.000100 loss_class: 0.833633 loss_bbox: 0.171975 loss_giou: 0.550826 loss_rad: 0.026290 loss_kpts: 0.933402 loss_class_aux: 4.632606 loss_bbox_aux: 1.359848 loss_giou_aux: 4.057109 loss_rad_aux: 0.151750 loss_kpts_aux: 5.612302 loss_class_dn: 0.410519 loss_bbox_dn: 0.152070 loss_giou_dn: 0.458959 loss_rad_dn: 0.008019 loss_kpts_dn: 0.957284 loss_class_aux_dn: 2.109612 loss_bbox_aux_dn: 0.868957 loss_giou_aux_dn: 2.608509 loss_rad_aux_dn: 0.025306 loss_kpts_aux_dn: 4.784942 loss: 31.452513 eta: 11:46:30 batch_cost: 0.6927 data_cost: 0.0005 ips: 11.5485 images/s
+[05/12 16:10:33] ppdet.engine INFO: Epoch: [7] [200/660] learning_rate: 0.000100 loss_class: 0.860319 loss_bbox: 0.181657 loss_giou: 0.514281 loss_rad: 0.025520 loss_kpts: 0.924147 loss_class_aux: 4.924611 loss_bbox_aux: 1.285104 loss_giou_aux: 3.594493 loss_rad_aux: 0.129492 loss_kpts_aux: 5.560869 loss_class_dn: 0.412964 loss_bbox_dn: 0.152134 loss_giou_dn: 0.436142 loss_rad_dn: 0.008383 loss_kpts_dn: 0.953755 loss_class_aux_dn: 2.155479 loss_bbox_aux_dn: 0.895157 loss_giou_aux_dn: 2.514147 loss_rad_aux_dn: 0.026900 loss_kpts_aux_dn: 4.779889 loss: 30.957853 eta: 11:43:53 batch_cost: 0.6832 data_cost: 0.0005 ips: 11.7101 images/s
+[05/12 16:12:55] ppdet.engine INFO: Epoch: [7] [400/660] learning_rate: 0.000100 loss_class: 0.810354 loss_bbox: 0.161726 loss_giou: 0.519646 loss_rad: 0.020784 loss_kpts: 0.917401 loss_class_aux: 4.675010 loss_bbox_aux: 1.221746 loss_giou_aux: 3.641612 loss_rad_aux: 0.122957 loss_kpts_aux: 5.553101 loss_class_dn: 0.404313 loss_bbox_dn: 0.142670 loss_giou_dn: 0.410667 loss_rad_dn: 0.006555 loss_kpts_dn: 0.952564 loss_class_aux_dn: 2.113420 loss_bbox_aux_dn: 0.830056 loss_giou_aux_dn: 2.339154 loss_rad_aux_dn: 0.020831 loss_kpts_aux_dn: 4.761956 loss: 29.877167 eta: 11:40:57 batch_cost: 0.6748 data_cost: 0.0005 ips: 11.8551 images/s
+[05/12 16:15:18] ppdet.engine INFO: Epoch: [7] [600/660] learning_rate: 0.000100 loss_class: 0.849739 loss_bbox: 0.158008 loss_giou: 0.428261 loss_rad: 0.018698 loss_kpts: 0.927113 loss_class_aux: 4.924249 loss_bbox_aux: 1.182447 loss_giou_aux: 3.024975 loss_rad_aux: 0.111876 loss_kpts_aux: 5.567727 loss_class_dn: 0.407407 loss_bbox_dn: 0.146343 loss_giou_dn: 0.391231 loss_rad_dn: 0.007731 loss_kpts_dn: 0.952006 loss_class_aux_dn: 2.139008 loss_bbox_aux_dn: 0.860491 loss_giou_aux_dn: 2.187688 loss_rad_aux_dn: 0.021292 loss_kpts_aux_dn: 4.764679 loss: 29.748516 eta: 11:38:07 batch_cost: 0.6762 data_cost: 0.0005 ips: 11.8313 images/s
+[05/12 16:16:04] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:16:04] ppdet.engine INFO: Eval iter: 0
+[05/12 16:16:14] ppdet.engine INFO: Eval iter: 100
+[05/12 16:16:25] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 16:16:25] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.74s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.66s).
+Accumulating evaluation results...
+DONE (t=0.43s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.634
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.825
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.738
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.458
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.576
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.682
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.094
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.484
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.786
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.645
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.730
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.828
+[05/12 16:16:33] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 16:16:33] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.013
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.031
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.010
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.022
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.021
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.046
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.016
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.008
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.030
+[05/12 16:16:33] ppdet.engine INFO: Total sample number: 733, average FPS: 37.159231957367886
+[05/12 16:16:33] ppdet.engine INFO: Best test bbox + keypoint ap is 0.448.
+[05/12 16:16:34] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:16:35] ppdet.engine INFO: Epoch: [8] [  0/660] learning_rate: 0.000100 loss_class: 0.768130 loss_bbox: 0.158008 loss_giou: 0.449140 loss_rad: 0.019298 loss_kpts: 0.927762 loss_class_aux: 4.460785 loss_bbox_aux: 1.188996 loss_giou_aux: 3.137111 loss_rad_aux: 0.113600 loss_kpts_aux: 5.569713 loss_class_dn: 0.371226 loss_bbox_dn: 0.135898 loss_giou_dn: 0.366346 loss_rad_dn: 0.006947 loss_kpts_dn: 0.951947 loss_class_aux_dn: 1.926273 loss_bbox_aux_dn: 0.793537 loss_giou_aux_dn: 2.067475 loss_rad_aux_dn: 0.019175 loss_kpts_aux_dn: 4.764933 loss: 28.679607 eta: 11:37:24 batch_cost: 0.6815 data_cost: 0.0005 ips: 11.7389 images/s
+[05/12 16:18:59] ppdet.engine INFO: Epoch: [8] [200/660] learning_rate: 0.000100 loss_class: 0.843910 loss_bbox: 0.176339 loss_giou: 0.511060 loss_rad: 0.024080 loss_kpts: 0.934483 loss_class_aux: 4.956658 loss_bbox_aux: 1.240805 loss_giou_aux: 3.356590 loss_rad_aux: 0.130066 loss_kpts_aux: 5.617367 loss_class_dn: 0.411921 loss_bbox_dn: 0.143946 loss_giou_dn: 0.427606 loss_rad_dn: 0.007014 loss_kpts_dn: 0.957335 loss_class_aux_dn: 2.145773 loss_bbox_aux_dn: 0.841975 loss_giou_aux_dn: 2.414871 loss_rad_aux_dn: 0.023425 loss_kpts_aux_dn: 4.790779 loss: 30.362774 eta: 11:34:56 batch_cost: 0.6845 data_cost: 0.0005 ips: 11.6876 images/s
+[05/12 16:21:24] ppdet.engine INFO: Epoch: [8] [400/660] learning_rate: 0.000100 loss_class: 0.843369 loss_bbox: 0.149230 loss_giou: 0.463723 loss_rad: 0.022850 loss_kpts: 0.931776 loss_class_aux: 4.825274 loss_bbox_aux: 1.088821 loss_giou_aux: 3.236827 loss_rad_aux: 0.117495 loss_kpts_aux: 5.568814 loss_class_dn: 0.386851 loss_bbox_dn: 0.139985 loss_giou_dn: 0.405729 loss_rad_dn: 0.007282 loss_kpts_dn: 0.954263 loss_class_aux_dn: 2.054032 loss_bbox_aux_dn: 0.833542 loss_giou_aux_dn: 2.295660 loss_rad_aux_dn: 0.022224 loss_kpts_aux_dn: 4.773870 loss: 29.867512 eta: 11:32:35 batch_cost: 0.6871 data_cost: 0.0005 ips: 11.6430 images/s
+[05/12 16:23:48] ppdet.engine INFO: Epoch: [8] [600/660] learning_rate: 0.000100 loss_class: 0.883079 loss_bbox: 0.171896 loss_giou: 0.499914 loss_rad: 0.021301 loss_kpts: 0.927189 loss_class_aux: 5.158703 loss_bbox_aux: 1.266120 loss_giou_aux: 3.370440 loss_rad_aux: 0.128149 loss_kpts_aux: 5.557100 loss_class_dn: 0.415282 loss_bbox_dn: 0.152341 loss_giou_dn: 0.391985 loss_rad_dn: 0.005872 loss_kpts_dn: 0.949330 loss_class_aux_dn: 2.156576 loss_bbox_aux_dn: 0.895229 loss_giou_aux_dn: 2.268876 loss_rad_aux_dn: 0.020508 loss_kpts_aux_dn: 4.749108 loss: 30.323566 eta: 11:30:05 batch_cost: 0.6833 data_cost: 0.0005 ips: 11.7072 images/s
+[05/12 16:24:32] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:24:33] ppdet.engine INFO: Eval iter: 0
+[05/12 16:24:44] ppdet.engine INFO: Eval iter: 100
+[05/12 16:24:54] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.06s)
+creating index...
+index created!
+[05/12 16:24:54] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.60s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.69s).
+Accumulating evaluation results...
+DONE (t=0.44s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.637
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.821
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.741
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.356
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.550
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.702
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.093
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.487
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.783
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.608
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.728
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.829
+[05/12 16:25:02] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.17s)
+creating index...
+index created!
+[05/12 16:25:02] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.011
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.032
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.006
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.023
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.021
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.048
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.017
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.005
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.031
+[05/12 16:25:02] ppdet.engine INFO: Total sample number: 733, average FPS: 35.80770736273381
+[05/12 16:25:02] ppdet.engine INFO: Best test bbox + keypoint ap is 0.450.
+[05/12 16:25:04] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:25:04] ppdet.engine INFO: Epoch: [9] [  0/660] learning_rate: 0.000100 loss_class: 0.891136 loss_bbox: 0.158798 loss_giou: 0.496208 loss_rad: 0.020994 loss_kpts: 0.931394 loss_class_aux: 5.222938 loss_bbox_aux: 1.186622 loss_giou_aux: 3.372895 loss_rad_aux: 0.123962 loss_kpts_aux: 5.581030 loss_class_dn: 0.413530 loss_bbox_dn: 0.148824 loss_giou_dn: 0.404708 loss_rad_dn: 0.006799 loss_kpts_dn: 0.954857 loss_class_aux_dn: 2.165862 loss_bbox_aux_dn: 0.847429 loss_giou_aux_dn: 2.332266 loss_rad_aux_dn: 0.021598 loss_kpts_aux_dn: 4.776491 loss: 30.174114 eta: 11:29:15 batch_cost: 0.6773 data_cost: 0.0007 ips: 11.8124 images/s
+[05/12 16:27:31] ppdet.engine INFO: Epoch: [9] [200/660] learning_rate: 0.000100 loss_class: 0.838368 loss_bbox: 0.146743 loss_giou: 0.435118 loss_rad: 0.019484 loss_kpts: 0.931645 loss_class_aux: 4.901293 loss_bbox_aux: 1.031630 loss_giou_aux: 2.975638 loss_rad_aux: 0.111739 loss_kpts_aux: 5.585007 loss_class_dn: 0.379485 loss_bbox_dn: 0.145631 loss_giou_dn: 0.390248 loss_rad_dn: 0.006696 loss_kpts_dn: 0.953957 loss_class_aux_dn: 1.978924 loss_bbox_aux_dn: 0.829773 loss_giou_aux_dn: 2.192447 loss_rad_aux_dn: 0.021045 loss_kpts_aux_dn: 4.774244 loss: 28.886738 eta: 11:27:10 batch_cost: 0.6951 data_cost: 0.0005 ips: 11.5089 images/s
+[05/12 16:29:54] ppdet.engine INFO: Epoch: [9] [400/660] learning_rate: 0.000100 loss_class: 0.795518 loss_bbox: 0.155369 loss_giou: 0.457395 loss_rad: 0.020577 loss_kpts: 0.926455 loss_class_aux: 4.820747 loss_bbox_aux: 1.091826 loss_giou_aux: 3.240787 loss_rad_aux: 0.121885 loss_kpts_aux: 5.581412 loss_class_dn: 0.397653 loss_bbox_dn: 0.136082 loss_giou_dn: 0.387333 loss_rad_dn: 0.005901 loss_kpts_dn: 0.952429 loss_class_aux_dn: 2.099653 loss_bbox_aux_dn: 0.786379 loss_giou_aux_dn: 2.199406 loss_rad_aux_dn: 0.020554 loss_kpts_aux_dn: 4.777145 loss: 29.786625 eta: 11:24:31 batch_cost: 0.6774 data_cost: 0.0005 ips: 11.8097 images/s
+[05/12 16:32:21] ppdet.engine INFO: Epoch: [9] [600/660] learning_rate: 0.000100 loss_class: 0.816316 loss_bbox: 0.147915 loss_giou: 0.437898 loss_rad: 0.018678 loss_kpts: 0.925168 loss_class_aux: 5.147024 loss_bbox_aux: 1.060892 loss_giou_aux: 3.004370 loss_rad_aux: 0.112410 loss_kpts_aux: 5.536517 loss_class_dn: 0.395089 loss_bbox_dn: 0.138827 loss_giou_dn: 0.392716 loss_rad_dn: 0.006578 loss_kpts_dn: 0.946975 loss_class_aux_dn: 2.090897 loss_bbox_aux_dn: 0.829103 loss_giou_aux_dn: 2.244548 loss_rad_aux_dn: 0.021595 loss_kpts_aux_dn: 4.736733 loss: 29.685169 eta: 11:22:28 batch_cost: 0.6966 data_cost: 0.0005 ips: 11.4839 images/s
+[05/12 16:33:06] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:33:06] ppdet.engine INFO: Eval iter: 0
+[05/12 16:33:17] ppdet.engine INFO: Eval iter: 100
+[05/12 16:33:27] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.18s)
+creating index...
+index created!
+[05/12 16:33:28] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.59s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.56s).
+Accumulating evaluation results...
+DONE (t=0.44s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.694
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.891
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.804
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.436
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.618
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.749
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.095
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.506
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.798
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.658
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.745
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.838
+[05/12 16:33:35] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+[05/12 16:33:35] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.010
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.030
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.005
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.019
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.020
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.043
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.016
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.004
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.030
+[05/12 16:33:36] ppdet.engine INFO: Total sample number: 733, average FPS: 36.3258748248396
+[05/12 16:33:36] ppdet.engine INFO: Best test bbox + keypoint ap is 0.489.
+[05/12 16:33:37] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:33:38] ppdet.engine INFO: Epoch: [10] [  0/660] learning_rate: 0.000100 loss_class: 0.808493 loss_bbox: 0.140483 loss_giou: 0.423355 loss_rad: 0.017969 loss_kpts: 0.925193 loss_class_aux: 5.003497 loss_bbox_aux: 0.984535 loss_giou_aux: 2.872748 loss_rad_aux: 0.112022 loss_kpts_aux: 5.536517 loss_class_dn: 0.382962 loss_bbox_dn: 0.135260 loss_giou_dn: 0.385229 loss_rad_dn: 0.007214 loss_kpts_dn: 0.945674 loss_class_aux_dn: 2.048611 loss_bbox_aux_dn: 0.778098 loss_giou_aux_dn: 2.181482 loss_rad_aux_dn: 0.021409 loss_kpts_aux_dn: 4.735120 loss: 29.261345 eta: 11:21:48 batch_cost: 0.6965 data_cost: 0.0005 ips: 11.4856 images/s
+[05/12 16:36:04] ppdet.engine INFO: Epoch: [10] [200/660] learning_rate: 0.000100 loss_class: 0.760396 loss_bbox: 0.136073 loss_giou: 0.414336 loss_rad: 0.017055 loss_kpts: 0.930956 loss_class_aux: 4.873190 loss_bbox_aux: 0.940711 loss_giou_aux: 2.773530 loss_rad_aux: 0.091164 loss_kpts_aux: 5.574589 loss_class_dn: 0.391361 loss_bbox_dn: 0.136116 loss_giou_dn: 0.381687 loss_rad_dn: 0.006675 loss_kpts_dn: 0.950671 loss_class_aux_dn: 2.079985 loss_bbox_aux_dn: 0.782775 loss_giou_aux_dn: 2.190485 loss_rad_aux_dn: 0.020125 loss_kpts_aux_dn: 4.756649 loss: 28.661266 eta: 11:19:40 batch_cost: 0.6941 data_cost: 0.0005 ips: 11.5257 images/s
+[05/12 16:38:28] ppdet.engine INFO: Epoch: [10] [400/660] learning_rate: 0.000100 loss_class: 0.766389 loss_bbox: 0.136253 loss_giou: 0.416641 loss_rad: 0.017895 loss_kpts: 0.927296 loss_class_aux: 4.601851 loss_bbox_aux: 0.947702 loss_giou_aux: 2.760881 loss_rad_aux: 0.091043 loss_kpts_aux: 5.567708 loss_class_dn: 0.377243 loss_bbox_dn: 0.133105 loss_giou_dn: 0.372510 loss_rad_dn: 0.006943 loss_kpts_dn: 0.945942 loss_class_aux_dn: 2.025045 loss_bbox_aux_dn: 0.767196 loss_giou_aux_dn: 2.133210 loss_rad_aux_dn: 0.020886 loss_kpts_aux_dn: 4.737204 loss: 28.083485 eta: 11:17:11 batch_cost: 0.6824 data_cost: 0.0005 ips: 11.7229 images/s
+[05/12 16:40:53] ppdet.engine INFO: Epoch: [10] [600/660] learning_rate: 0.000100 loss_class: 0.724168 loss_bbox: 0.132918 loss_giou: 0.379236 loss_rad: 0.014634 loss_kpts: 0.921528 loss_class_aux: 4.562897 loss_bbox_aux: 0.987499 loss_giou_aux: 2.703679 loss_rad_aux: 0.097742 loss_kpts_aux: 5.540815 loss_class_dn: 0.377110 loss_bbox_dn: 0.133822 loss_giou_dn: 0.371677 loss_rad_dn: 0.005847 loss_kpts_dn: 0.947593 loss_class_aux_dn: 1.982839 loss_bbox_aux_dn: 0.765878 loss_giou_aux_dn: 2.081068 loss_rad_aux_dn: 0.018660 loss_kpts_aux_dn: 4.731796 loss: 27.724781 eta: 11:14:54 batch_cost: 0.6888 data_cost: 0.0005 ips: 11.6139 images/s
+[05/12 16:41:38] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:41:38] ppdet.engine INFO: Eval iter: 0
+[05/12 16:41:48] ppdet.engine INFO: Eval iter: 100
+[05/12 16:41:59] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.06s)
+creating index...
+index created!
+[05/12 16:41:59] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.59s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.55s).
+Accumulating evaluation results...
+DONE (t=0.43s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.716
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.918
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.826
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.484
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.644
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.768
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.095
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.517
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.799
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.654
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.750
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.837
+[05/12 16:42:06] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.16s)
+creating index...
+index created!
+[05/12 16:42:07] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.010
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.028
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.008
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.015
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.017
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.040
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.013
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.006
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.024
+[05/12 16:42:07] ppdet.engine INFO: Total sample number: 733, average FPS: 37.27764055490322
+[05/12 16:42:07] ppdet.engine INFO: Best test bbox + keypoint ap is 0.504.
+[05/12 16:42:08] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:42:09] ppdet.engine INFO: Epoch: [11] [  0/660] learning_rate: 0.000100 loss_class: 0.725840 loss_bbox: 0.131795 loss_giou: 0.380306 loss_rad: 0.015596 loss_kpts: 0.924788 loss_class_aux: 4.476438 loss_bbox_aux: 1.004516 loss_giou_aux: 2.862822 loss_rad_aux: 0.098237 loss_kpts_aux: 5.554801 loss_class_dn: 0.386667 loss_bbox_dn: 0.130716 loss_giou_dn: 0.371936 loss_rad_dn: 0.006670 loss_kpts_dn: 0.948013 loss_class_aux_dn: 2.036477 loss_bbox_aux_dn: 0.755306 loss_giou_aux_dn: 2.111470 loss_rad_aux_dn: 0.020238 loss_kpts_aux_dn: 4.747303 loss: 28.101830 eta: 11:14:09 batch_cost: 0.6842 data_cost: 0.0005 ips: 11.6926 images/s
+[05/12 16:44:32] ppdet.engine INFO: Epoch: [11] [200/660] learning_rate: 0.000100 loss_class: 0.781634 loss_bbox: 0.149188 loss_giou: 0.438320 loss_rad: 0.017875 loss_kpts: 0.931285 loss_class_aux: 4.761079 loss_bbox_aux: 1.100526 loss_giou_aux: 3.140769 loss_rad_aux: 0.107917 loss_kpts_aux: 5.553302 loss_class_dn: 0.392854 loss_bbox_dn: 0.135199 loss_giou_dn: 0.397611 loss_rad_dn: 0.006095 loss_kpts_dn: 0.948419 loss_class_aux_dn: 2.099512 loss_bbox_aux_dn: 0.780668 loss_giou_aux_dn: 2.218048 loss_rad_aux_dn: 0.019161 loss_kpts_aux_dn: 4.748237 loss: 29.197659 eta: 11:11:34 batch_cost: 0.6777 data_cost: 0.0005 ips: 11.8041 images/s
+[05/12 16:46:57] ppdet.engine INFO: Epoch: [11] [400/660] learning_rate: 0.000100 loss_class: 0.773488 loss_bbox: 0.135516 loss_giou: 0.405026 loss_rad: 0.016491 loss_kpts: 0.931537 loss_class_aux: 4.755309 loss_bbox_aux: 1.076252 loss_giou_aux: 3.231374 loss_rad_aux: 0.108668 loss_kpts_aux: 5.602757 loss_class_dn: 0.376375 loss_bbox_dn: 0.127340 loss_giou_dn: 0.382238 loss_rad_dn: 0.005614 loss_kpts_dn: 0.950146 loss_class_aux_dn: 2.012729 loss_bbox_aux_dn: 0.747191 loss_giou_aux_dn: 2.120260 loss_rad_aux_dn: 0.020187 loss_kpts_aux_dn: 4.761860 loss: 28.887871 eta: 11:09:13 batch_cost: 0.6857 data_cost: 0.0005 ips: 11.6673 images/s
+[05/12 16:49:20] ppdet.engine INFO: Epoch: [11] [600/660] learning_rate: 0.000100 loss_class: 0.780368 loss_bbox: 0.159682 loss_giou: 0.441222 loss_rad: 0.018889 loss_kpts: 0.930569 loss_class_aux: 4.682470 loss_bbox_aux: 1.437463 loss_giou_aux: 3.392308 loss_rad_aux: 0.107286 loss_kpts_aux: 5.566280 loss_class_dn: 0.375374 loss_bbox_dn: 0.131200 loss_giou_dn: 0.361956 loss_rad_dn: 0.007254 loss_kpts_dn: 0.945495 loss_class_aux_dn: 1.999754 loss_bbox_aux_dn: 0.733822 loss_giou_aux_dn: 2.039362 loss_rad_aux_dn: 0.020419 loss_kpts_aux_dn: 4.731462 loss: 29.437696 eta: 11:06:45 batch_cost: 0.6818 data_cost: 0.0005 ips: 11.7340 images/s
+[05/12 16:50:05] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:50:05] ppdet.engine INFO: Eval iter: 0
+[05/12 16:50:16] ppdet.engine INFO: Eval iter: 100
+[05/12 16:50:26] ppdet.metrics.metrics INFO: The bbox result is saved to bbox.json.
+loading annotations into memory...
+Done (t=0.06s)
+creating index...
+index created!
+[05/12 16:50:26] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.59s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.52s).
+Accumulating evaluation results...
+DONE (t=0.43s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.722
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.924
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.834
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.460
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.641
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.777
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.097
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.522
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.803
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.666
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.757
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.839
+[05/12 16:50:34] ppdet.metrics.metrics INFO: The keypoint result is saved to keypoint.json.
+loading annotations into memory...
+Done (t=0.16s)
+creating index...
+index created!
+[05/12 16:50:34] ppdet.metrics.coco_utils INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *keypoints*
+DONE (t=0.29s).
+Accumulating evaluation results...
+DONE (t=0.01s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.011
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.031
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.004
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.004
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.020
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.019
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.043
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.012
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.008
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.026
+[05/12 16:50:34] ppdet.engine INFO: Total sample number: 733, average FPS: 36.83104871622777
+[05/12 16:50:34] ppdet.engine INFO: Best test bbox + keypoint ap is 0.509.
+[05/12 16:50:35] ppdet.utils.checkpoint INFO: Save checkpoint: output/rtdetr_r50vd_6x_oad_kpts
+[05/12 16:50:36] ppdet.engine INFO: Epoch: [12] [  0/660] learning_rate: 0.000100 loss_class: 0.741650 loss_bbox: 0.161226 loss_giou: 0.473131 loss_rad: 0.016889 loss_kpts: 0.936245 loss_class_aux: 4.641119 loss_bbox_aux: 1.370235 loss_giou_aux: 3.387650 loss_rad_aux: 0.104863 loss_kpts_aux: 5.604039 loss_class_dn: 0.375374 loss_bbox_dn: 0.133495 loss_giou_dn: 0.364992 loss_rad_dn: 0.005555 loss_kpts_dn: 0.948788 loss_class_aux_dn: 1.991893 loss_bbox_aux_dn: 0.737971 loss_giou_aux_dn: 2.058424 loss_rad_aux_dn: 0.018823 loss_kpts_aux_dn: 4.744941 loss: 29.666500 eta: 11:06:02 batch_cost: 0.6807 data_cost: 0.0005 ips: 11.7530 images/s
+[05/12 16:53:02] ppdet.engine INFO: Epoch: [12] [200/660] learning_rate: 0.000100 loss_class: 0.852063 loss_bbox: 0.141536 loss_giou: 0.417495 loss_rad: 0.018877 loss_kpts: 0.930143 loss_class_aux: 5.085758 loss_bbox_aux: 1.135978 loss_giou_aux: 3.132037 loss_rad_aux: 0.105970 loss_kpts_aux: 5.565263 loss_class_dn: 0.386269 loss_bbox_dn: 0.134195 loss_giou_dn: 0.373402 loss_rad_dn: 0.006295 loss_kpts_dn: 0.945916 loss_class_aux_dn: 2.113155 loss_bbox_aux_dn: 0.763970 loss_giou_aux_dn: 2.116383 loss_rad_aux_dn: 0.020462 loss_kpts_aux_dn: 4.728675 loss: 29.558167 eta: 11:03:51 batch_cost: 0.6927 data_cost: 0.0005 ips: 11.5495 images/s

@@ -128,6 +128,7 @@ def cocoapi_eval(jsonfile,
             coco_eval = COCOeval(coco_gt, coco_dt, style)
         
         if add_kpts:
+            # FIXME : 여기서 coco_gt의 클래스를 맞춰주면 되지 않을까?
             # keypoint에서 추정하는 박스는 일반 bbox
             # for tmp_idx, _ in enumerate(coco_gt.dataset['annotations']):
             #     cx, cy, witdh, height = coco_gt.dataset['annotations'][tmp_idx]['rbbox'][:4]

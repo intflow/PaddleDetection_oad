@@ -178,7 +178,7 @@ def get_keypoint_res_oad_kpts(results, im_id):
         image_id = im_id[idx].item()
         kpt = preds[idx]
         score = bbox_score[idx]
-        
+        # FIXME : category_id가 하나밖에 없다 = class는 한개만 적용한다.
         kpt = kpt.flatten()
         ann = {
                 'image_id': image_id,
