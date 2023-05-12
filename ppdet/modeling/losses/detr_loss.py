@@ -1161,6 +1161,36 @@ class DETRLoss_oad_kpts(nn.Layer):
          F.smooth_l1_loss(paddle.sin(src_rad), paddle.sin(target_rad), reduction='sum')) / num_gts
         return loss
     
+    def _get_loss_kpts(self, kpts, gt_keypoint, boxes, gt_bbox, match_indices, num_gts,
+                       postfix=""):
+        # kpts: [b, query, 1], gt_keypoint: list[[n, 1]]
+        name_kpts = "loss_kpts" + postfix
+        
+        sigmas = paddle.to_tensor([.5]*kpts.shape[-1])
+
+        loss = dict()
+        if sum(len(a) for a in gt_keypoint) == 0:
+            loss[name_kpts] = paddle.to_tensor([0.])
+            return loss
+
+        src_kpts, target_kpts = self._get_src_target_assign(kpts, gt_keypoint, match_indices)
+        
+        src_bbox, target_bbox = self._get_src_target_assign(boxes, gt_bbox, match_indices)
+        
+        diff = (src_kpts - target_kpts) ** 2
+        s = paddle.prod(target_bbox[:,-2:], axis=1, keepdim=True)
+        
+        # Mask code 
+        loss[name_kpts] = self.loss_coeff['rad'] * (1 - paddle.exp(-diff/(2*(s*sigmas)**2+1e-9))).mean()
+        
+        # #### example yolov7_oad oks based loss
+        # d = (pkpt_x-selected_tkpt[:,0::2])**2 + (pkpt_y-selected_tkpt[:,1::2])**2
+        # s = torch.prod(selected_tbox[:,-2:], dim=1, keepdim=True)
+        # kpt_loss_factor = (torch.sum(kpt_mask != 0) + torch.sum(kpt_mask == 0))/(torch.sum(kpt_mask != 0) + 1e-9)
+        # lkpt += kpt_loss_factor*((1 - torch.exp(-d/(2*(s*sigmas)**2+1e-9)))*kpt_mask).mean()
+        
+        return loss
+    
     def _get_loss_mask(self, masks, gt_mask, match_indices, num_gts,
                        postfix=""):
         # masks: [b, query, h, w], gt_mask: list[[n, H, W]]
@@ -1200,9 +1230,11 @@ class DETRLoss_oad_kpts(nn.Layer):
     def _get_loss_aux(self,
                       boxes,
                       rads,
+                      kpts,
                       logits,
                       gt_bbox,
                       gt_rad,
+                      gt_keypoint,
                       gt_class,
                       bg_index,
                       num_gts,
@@ -1213,6 +1245,7 @@ class DETRLoss_oad_kpts(nn.Layer):
         loss_class = []
         loss_bbox, loss_giou = [], []
         loss_rad = []
+        loss_kpts = []
         loss_mask, loss_dice = [], []
         if dn_match_indices is not None:
             match_indices = dn_match_indices
@@ -1220,21 +1253,25 @@ class DETRLoss_oad_kpts(nn.Layer):
             match_indices = self.matcher(
                 boxes[self.uni_match_ind],
                 rads[self.uni_match_ind],
+                kpts[self.uni_match_ind],
                 logits[self.uni_match_ind],
                 gt_bbox,
                 gt_rad,
+                gt_keypoint,
                 gt_class,
                 masks=masks[self.uni_match_ind] if masks is not None else None,
                 gt_mask=gt_mask)
-        for i, (aux_boxes, aux_rads, aux_logits) in enumerate(zip(boxes, rads, logits)):
+        for i, (aux_boxes, aux_rads, aux_kpts, aux_logits) in enumerate(zip(boxes, rads, kpts, logits)):
             aux_masks = masks[i] if masks is not None else None
             if not self.use_uni_match and dn_match_indices is None:
                 match_indices = self.matcher(
                     aux_boxes,
                     aux_rads,
+                    aux_kpts,
                     aux_logits,
                     gt_bbox,
                     gt_rad,
+                    gt_keypoint,
                     gt_class,
                     masks=aux_masks,
                     gt_mask=gt_mask)
@@ -1262,6 +1299,10 @@ class DETRLoss_oad_kpts(nn.Layer):
                 self._get_loss_rad(aux_rads, gt_rad, match_indices,
                                     num_gts, postfix)[
                                          'loss_rad' + postfix])
+            loss_kpts.append(
+                self._get_loss_kpts(aux_kpts, gt_keypoint, aux_boxes, gt_bbox, match_indices,
+                                    num_gts, postfix)[
+                                         'loss_kpts' + postfix])
             if masks is not None and gt_mask is not None:
                 loss_ = self._get_loss_mask(aux_masks, gt_mask, match_indices,
                                             num_gts, postfix)
@@ -1271,7 +1312,8 @@ class DETRLoss_oad_kpts(nn.Layer):
             "loss_class_aux" + postfix: paddle.add_n(loss_class),
             "loss_bbox_aux" + postfix: paddle.add_n(loss_bbox),
             "loss_giou_aux" + postfix: paddle.add_n(loss_giou),
-            "loss_rad_aux" + postfix: paddle.add_n(loss_rad)
+            "loss_rad_aux" + postfix: paddle.add_n(loss_rad),
+            "loss_kpts_aux" + postfix: paddle.add_n(loss_kpts)
         }
         if masks is not None and gt_mask is not None:
             loss["loss_mask_aux" + postfix] = paddle.add_n(loss_mask)
@@ -1356,6 +1398,9 @@ class DETRLoss_oad_kpts(nn.Layer):
         loss.update(
             self._get_loss_rad(rads, gt_rad, match_indices, num_gts,
                                 postfix))
+        loss.update(
+            self._get_loss_kpts(kpts, gt_keypoint, boxes, gt_bbox, match_indices, num_gts,
+                                postfix))
         if masks is not None and gt_mask is not None:
             loss.update(
                 self._get_loss_mask(masks, gt_mask, match_indices, num_gts,
@@ -1367,6 +1412,7 @@ class DETRLoss_oad_kpts(nn.Layer):
                 rads,
                 kpts,
                 logits,
+                kpts_score,
                 gt_bbox,
                 gt_rad,
                 gt_keypoint,
@@ -1411,9 +1457,11 @@ class DETRLoss_oad_kpts(nn.Layer):
                 self._get_loss_aux(
                     boxes[:-1],
                     rads[:-1],
+                    kpts[:-1],
                     logits[:-1],
                     gt_bbox,
                     gt_rad,
+                    gt_keypoint,
                     gt_class,
                     self.num_classes,
                     num_gts,
@@ -1431,6 +1479,7 @@ class DINOLoss_oad_kpts(DETRLoss_oad_kpts):
                 rads,
                 kpts,
                 logits,
+                kpts_score,
                 gt_bbox,
                 gt_rad,
                 gt_keypoint,
@@ -1440,12 +1489,14 @@ class DINOLoss_oad_kpts(DETRLoss_oad_kpts):
                 postfix="",
                 dn_out_bboxes=None,
                 dn_out_rads=None,
+                dn_out_kpts=None,
                 dn_out_logits=None,
+                dn_out_kpts_score=None,
                 dn_meta=None,
                 **kwargs):
         num_gts = self._get_num_gts(gt_class)
         total_loss = super(DINOLoss_oad_kpts, self).forward(
-            boxes, rads, kpts, logits, gt_bbox, gt_rad, gt_keypoint, gt_class, num_gts=num_gts)
+            boxes, rads, kpts, logits, kpts_score, gt_bbox, gt_rad, gt_keypoint, gt_class, num_gts=num_gts)
 
         if dn_meta is not None:
             dn_positive_idx, dn_num_group = \
@@ -1461,9 +1512,12 @@ class DINOLoss_oad_kpts(DETRLoss_oad_kpts):
             dn_loss = super(DINOLoss_oad_kpts, self).forward(
                 dn_out_bboxes,
                 dn_out_rads,
+                dn_out_kpts,
                 dn_out_logits,
+                dn_out_kpts_score,
                 gt_bbox,
                 gt_rad,
+                gt_keypoint,
                 gt_class,
                 postfix="_dn",
                 dn_match_indices=dn_match_indices,

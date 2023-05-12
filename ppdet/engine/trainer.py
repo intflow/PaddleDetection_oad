@@ -73,7 +73,7 @@ class Trainer(object):
         self.custom_white_list = self.cfg.get('custom_white_list', None)
         self.custom_black_list = self.cfg.get('custom_black_list', None)
         self.add_rad = self.cfg.get('add_rad', False)
-        self.add_kpts = self.cfg.get('add_kpts', 0)
+        self.add_kpts = self.cfg.get('add_kpts', False)
         if 'slim' in cfg and cfg['slim_type'] == 'PTQ':
             self.cfg['TestDataset'] = create('TestDataset')()
 

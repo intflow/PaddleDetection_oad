@@ -15,7 +15,7 @@ import six
 import numpy as np
 
 
-def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0, add_rad=False, add_kpts=0):
+def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0, add_rad=False):
     det_res = []
     k = 0
     for i in range(len(bbox_nums)):
@@ -170,6 +170,32 @@ def get_keypoint_res(results, im_id):
             anns.append(ann)
     return anns
 
+def get_keypoint_res_oad_kpts(results, im_id):
+    anns = []
+    preds = results['keypoint']
+    bbox_score = results['bbox'][:,1]
+    for idx in range(im_id.shape[0]):
+        image_id = im_id[idx].item()
+        kpt = preds[idx]
+        score = bbox_score[idx]
+        
+        kpt = kpt.flatten()
+        ann = {
+                'image_id': image_id,
+                'category_id': 0,  # XXX hard code
+                'keypoints': kpt.tolist(),
+                'score': float(score)
+            }
+        
+        x = kpt[0::3]
+        y = kpt[1::3]
+        x0, x1, y0, y1 = np.min(x).item(), np.max(x).item(), np.min(y).item(
+        ), np.max(y).item()
+        ann['area'] = (x1 - x0) * (y1 - y0)
+        ann['bbox'] = [x0, y0, x1 - x0, y1 - y0]
+        anns.append(ann)
+        
+    return anns
 
 def get_pose3d_res(results, im_id):
     anns = []

@@ -39,7 +39,7 @@ def visualize_results(image,
                       catid2name,
                       threshold=0.5,
                       add_rad=False,
-                      add_kpts=0):
+                      add_kpts=False):
     """
     Visualize bbox and mask results
     """

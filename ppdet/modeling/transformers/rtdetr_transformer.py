@@ -956,6 +956,7 @@ class TransformerDecoder_oad_kpts(nn.Layer):
                 rad_head,
                 kpts_head,
                 score_head,
+                kpts_score_head,
                 query_pos_head,
                 attn_mask=None,
                 memory_mask=None):
@@ -964,6 +965,7 @@ class TransformerDecoder_oad_kpts(nn.Layer):
         dec_out_rad = []
         dec_out_kpts = []
         dec_out_logits = []
+        dec_out_kpts_score = []
         ref_points_detach = F.sigmoid(ref_points_unact)
         ref_rad_detach = ref_rad
         ref_kpts_detach = F.sigmoid(ref_kpts)
@@ -985,6 +987,7 @@ class TransformerDecoder_oad_kpts(nn.Layer):
 
             if self.training:
                 dec_out_logits.append(score_head[i](output))
+                dec_out_kpts_score.append(kpts_score_head[i](output))
                 if i == 0:
                     dec_out_bboxes.append(inter_ref_bbox)
                     dec_out_rad.append(inter_ref_rad)
@@ -998,6 +1001,7 @@ class TransformerDecoder_oad_kpts(nn.Layer):
 
             elif i == self.eval_idx:
                 dec_out_logits.append(score_head[i](output))
+                dec_out_kpts_score.append(kpts_score_head[i](output))
                 dec_out_bboxes.append(inter_ref_bbox)
                 dec_out_rad.append(inter_ref_rad)
                 dec_out_kpts.append(inter_ref_kpts)
@@ -1014,7 +1018,7 @@ class TransformerDecoder_oad_kpts(nn.Layer):
             ref_kpts_detach = inter_ref_kpts.detach(
             ) if self.training else inter_ref_kpts
 
-        return paddle.stack(dec_out_bboxes), paddle.stack(dec_out_rad), paddle.stack(dec_out_kpts), paddle.stack(dec_out_logits)
+        return paddle.stack(dec_out_bboxes), paddle.stack(dec_out_rad), paddle.stack(dec_out_kpts), paddle.stack(dec_out_logits), paddle.stack(dec_out_kpts_score)
 
 
 
@@ -1043,7 +1047,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
                  eval_size=None,
                  eval_idx=-1,
                  eps=1e-2,
-                 out_kpts_layer=0):
+                 out_kpts_num=0):
         super(RTDETRTransformer_oad_kpts, self).__init__()
         assert position_embed_type in ['sine', 'learned'], \
             f'ValueError: position_embed_type not supported {position_embed_type}!'
@@ -1061,7 +1065,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         self.eps = eps
         self.num_decoder_layers = num_decoder_layers
         self.eval_size = eval_size
-        self.out_kpts_layer = out_kpts_layer
+        self.out_kpts_num = out_kpts_num
 
         # backbone feature projection
         self._build_input_proj_layer(backbone_feat_channels)
@@ -1098,7 +1102,8 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         self.enc_score_head = nn.Linear(hidden_dim, num_classes)
         self.enc_bbox_head = MLP(hidden_dim, hidden_dim, 4, num_layers=3)
         self.enc_rad_head = MLP(hidden_dim, hidden_dim, 1, num_layers=1)
-        self.enc_kpts_head = MLP(hidden_dim, hidden_dim, out_kpts_layer, num_layers=3)
+        self.enc_kpts_head = MLP(hidden_dim, hidden_dim, out_kpts_num*2, num_layers=3)
+        self.enc_kpts_score_head = nn.Linear(hidden_dim, out_kpts_num)
 
         # decoder head
         self.dec_score_head = nn.LayerList([
@@ -1114,7 +1119,11 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
             for _ in range(num_decoder_layers)
         ])
         self.dec_kpts_head = nn.LayerList([
-            MLP(hidden_dim, hidden_dim, out_kpts_layer, num_layers=3)
+            MLP(hidden_dim, hidden_dim, out_kpts_num*2, num_layers=3)
+            for _ in range(num_decoder_layers)
+        ])
+        self.dec_kpts_score_head = nn.LayerList([
+            nn.Linear(hidden_dim, out_kpts_num)
             for _ in range(num_decoder_layers)
         ])
 
@@ -1132,7 +1141,15 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         constant_(self.enc_rad_head.layers[-1].bias)
         constant_(self.enc_kpts_head.layers[-1].weight)
         constant_(self.enc_kpts_head.layers[-1].bias)
+        linear_init_(self.enc_kpts_score_head)
+        constant_(self.enc_kpts_score_head.bias, bias_cls)
         for cls_, reg_ in zip(self.dec_score_head, self.dec_bbox_head):
+            linear_init_(cls_)
+            constant_(cls_.bias, bias_cls)
+            constant_(reg_.layers[-1].weight)
+            constant_(reg_.layers[-1].bias)
+            
+        for cls_, reg_ in zip(self.dec_kpts_score_head, self.dec_kpts_head):
             linear_init_(cls_)
             constant_(cls_.bias, bias_cls)
             constant_(reg_.layers[-1].weight)
@@ -1229,16 +1246,16 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
                                             self.label_noise_ratio,
                                             self.box_noise_scale,
                                             active_radian=True,
-                                            active_kpts=self.out_kpts_layer)
+                                            active_kpts=self.out_kpts_num)
         else:
             denoising_class, denoising_bbox_unact, denoising_rad, denoising_kpts, attn_mask, dn_meta = None, None, None, None, None, None
 
-        target, init_ref_points_unact, enc_topk_bboxes, init_ref_rad, enc_topk_rad, init_ref_kpts, enc_topk_kpts, enc_topk_logits = \
+        target, init_ref_points_unact, enc_topk_bboxes, init_ref_rad, enc_topk_rad, init_ref_kpts, enc_topk_kpts, enc_topk_logits, enc_topk_kpts_score = \
             self._get_decoder_input(
             memory, spatial_shapes, denoising_class, denoising_bbox_unact, denoising_rad, denoising_kpts)
 
         # decoder
-        out_bboxes, out_rad, out_kpts, out_logits = self.decoder(
+        out_bboxes, out_rad, out_kpts, out_logits, out_kpts_score = self.decoder(
             target,
             init_ref_points_unact,
             init_ref_rad,
@@ -1250,9 +1267,11 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
             self.dec_rad_head,
             self.dec_kpts_head,
             self.dec_score_head,
+            self.dec_kpts_score_head,
             self.query_pos_head,
             attn_mask=attn_mask)
-        return (out_bboxes, out_rad, out_kpts, out_logits, enc_topk_bboxes, enc_topk_rad, enc_topk_kpts, enc_topk_logits,
+        return (out_bboxes, out_rad, out_kpts, out_logits, out_kpts_score, 
+                enc_topk_bboxes, enc_topk_rad, enc_topk_kpts, enc_topk_logits, enc_topk_kpts_score,
                 dn_meta)
 
     def _generate_anchors(self,
@@ -1309,6 +1328,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         enc_outputs_rad = self.enc_rad_head(output_memory)
         #! kpts
         enc_outputs_kpts = self.enc_kpts_head(output_memory)
+        enc_outputs_kpts_score = self.enc_kpts_score_head(output_memory)
 
         _, topk_ind = paddle.topk(
             enc_outputs_class.max(-1), self.num_queries, axis=1)
@@ -1317,8 +1337,7 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         batch_ind = batch_ind.unsqueeze(-1).tile([1, self.num_queries])
         topk_ind = paddle.stack([batch_ind, topk_ind], axis=-1)
 
-        reference_points_unact = paddle.gather_nd(enc_outputs_coord_unact,
-                                                  topk_ind)  # unsigmoided. {4, 300, 4}
+        reference_points_unact = paddle.gather_nd(enc_outputs_coord_unact, topk_ind)  # unsigmoided. {4, 300, 4}
         enc_topk_bboxes = F.sigmoid(reference_points_unact)
         
         #! rad
@@ -1329,6 +1348,9 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         #! kpts
         reference_kpts = paddle.gather_nd(enc_outputs_kpts, topk_ind)
         enc_topk_kpts = F.sigmoid(reference_kpts)
+        
+        reference_kpts_score = paddle.gather_nd(enc_outputs_kpts_score, topk_ind)
+        enc_topk_kpts_score = F.sigmoid(reference_kpts_score)
         
         if denoising_bbox_unact is not None:
             reference_points_unact = paddle.concat(
@@ -1348,6 +1370,8 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
             reference_kpts = reference_kpts.detach()
             
         enc_topk_logits = paddle.gather_nd(enc_outputs_class, topk_ind)
+        enc_topk_kpts_score = paddle.gather_nd(enc_outputs_kpts_score, topk_ind)
+        
 
         # extract region features
         if self.learnt_init_query:
@@ -1359,4 +1383,4 @@ class RTDETRTransformer_oad_kpts(nn.Layer):
         if denoising_class is not None:
             target = paddle.concat([denoising_class, target], 1)
 
-        return target, reference_points_unact, enc_topk_bboxes, reference_rad, enc_topk_rad, reference_kpts, enc_topk_kpts, enc_topk_logits
+        return target, reference_points_unact, enc_topk_bboxes, reference_rad, enc_topk_rad, reference_kpts, enc_topk_kpts, enc_topk_logits, enc_topk_kpts_score

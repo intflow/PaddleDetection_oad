@@ -38,3 +38,221 @@ Done (t=1.95s)
 creating index...
 index created!
 W0509 16:12:23.527822 94884 reducer.cc:622] All parameters are involved in the backward pass. It is recommended to set find_unused_parameters to False to improve performance. However, if unused parameters appear in subsequent iterative training, then an error will occur. Please make it clear that in the subsequent training, there will be no parameters that are not used in the backward pass, and then set find_unused_parameters
+I0510 14:09:28.201020 48900 tcp_utils.cc:107] Retry to connect to 127.0.1.1:47288 while the server is not yet listening.
+I0510 14:09:31.201274 48900 tcp_utils.cc:130] Successfully connected to 127.0.1.1:47288
+W0510 14:09:32.833254 48900 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0510 14:09:32.835820 48900 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+Config annotation dataset/aic_coco_train_cocoformat.json is not a file, dataset config is not valid
+Traceback (most recent call last):
+  File "tools/train.py", line 202, in <module>
+    main()
+  File "tools/train.py", line 198, in main
+    run(FLAGS, cfg)
+  File "tools/train.py", line 142, in run
+    trainer = Trainer(cfg, mode='train')
+  File "/works/PaddleDetection_oad/ppdet/engine/trainer.py", line 100, in __init__
+    self.loader = create('{}Reader'.format(capital_mode))(
+  File "/works/PaddleDetection_oad/ppdet/data/reader.py", line 167, in __call__
+    self.dataset.check_or_download_dataset()
+  File "/works/PaddleDetection_oad/ppdet/data/source/dataset.py", line 105, in check_or_download_dataset
+    self.dataset_dir = get_dataset_path(self.dataset_dir, self.anno_path,
+  File "/works/PaddleDetection_oad/ppdet/utils/download.py", line 190, in get_dataset_path
+    raise ValueError(
+ValueError: Dataset /works/PaddleDetection_oad/dataset is not valid for reason above, please check again.
+Traceback (most recent call last):
+  File "tools/train.py", line 202, in <module>
+    main()
+  File "tools/train.py", line 156, in main
+    cfg = load_config(FLAGS.config)
+  File "/works/PaddleDetection_oad/ppdet/core/workspace.py", line 123, in load_config
+    cfg = _load_config_with_base(file_path)
+  File "/works/PaddleDetection_oad/ppdet/core/workspace.py", line 87, in _load_config_with_base
+    with open(file_path) as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'configs/picodet/application/pedestrian_detection/picodet_s_320_pedestrian.yml'
+I0512 10:25:16.683821 74393 tcp_utils.cc:107] Retry to connect to 127.0.1.1:57320 while the server is not yet listening.
+I0512 10:25:19.684114 74393 tcp_utils.cc:130] Successfully connected to 127.0.1.1:57320
+W0512 10:25:21.334312 74393 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 10:25:21.336931 74393 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 10:25:21,903] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=1.54s)
+creating index...
+index created!
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   squeeze_ad_func(paddle::experimental::Tensor const&, paddle::experimental::IntArrayBase<paddle::experimental::Tensor>)
+1   paddle::experimental::squeeze_intermediate(paddle::experimental::Tensor const&, paddle::experimental::IntArrayBase<paddle::experimental::Tensor> const&)
+2   paddle::experimental::PrepareData(paddle::experimental::Tensor const&, phi::TensorArgDef const&, paddle::experimental::TransformFlag const&)
+3   paddle::experimental::TransformData(phi::DenseTensor*, phi::TensorArgDef const&, paddle::experimental::TransformFlag const&)
+4   paddle::experimental::TransDataPlace(phi::DenseTensor const&, phi::Place)
+5   paddle::framework::TensorCopySync(phi::DenseTensor const&, phi::Place const&, phi::DenseTensor*)
+6   void paddle::memory::Copy<phi::Place, phi::Place>(phi::Place, void*, phi::Place, void const*, unsigned long, void*)
+7   void paddle::memory::Copy<phi::GPUPlace, phi::GPUPinnedPlace>(phi::GPUPlace, void*, phi::GPUPinnedPlace, void const*, unsigned long, void*)
+8   phi::backends::gpu::GpuMemcpySync(void*, void const*, unsigned long, cudaMemcpyKind)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683855249 (unix time) try "date -d @1683855249" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0x12236) received by PID 74393 (TID 0x7fe0dc9c5740) from PID 74294 ***]
+
+I0512 10:35:12.480211 77340 tcp_utils.cc:107] Retry to connect to 127.0.1.1:50726 while the server is not yet listening.
+I0512 10:35:15.480592 77340 tcp_utils.cc:130] Successfully connected to 127.0.1.1:50726
+W0512 10:35:17.131563 77340 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 10:35:17.134140 77340 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 10:35:17,703] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=1.54s)
+creating index...
+index created!
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   phi::backends::gpu::GpuMemcpySync(void*, void const*, unsigned long, cudaMemcpyKind)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683856931 (unix time) try "date -d @1683856931" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0x12db9) received by PID 77340 (TID 0x7f9309407740) from PID 77241 ***]
+
+I0512 11:02:19.434635 83124 tcp_utils.cc:130] Successfully connected to 127.0.1.1:50418
+W0512 11:02:21.045944 83124 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 11:02:21.048480 83124 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 11:02:22,163] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=1.56s)
+creating index...
+index created!
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   squeeze_ad_func(paddle::experimental::Tensor const&, paddle::experimental::IntArrayBase<paddle::experimental::Tensor>)
+1   paddle::experimental::squeeze_intermediate(paddle::experimental::Tensor const&, paddle::experimental::IntArrayBase<paddle::experimental::Tensor> const&)
+2   paddle::experimental::PrepareData(paddle::experimental::Tensor const&, phi::TensorArgDef const&, paddle::experimental::TransformFlag const&)
+3   paddle::experimental::TransformData(phi::DenseTensor*, phi::TensorArgDef const&, paddle::experimental::TransformFlag const&)
+4   paddle::experimental::TransDataPlace(phi::DenseTensor const&, phi::Place)
+5   paddle::framework::TensorCopySync(phi::DenseTensor const&, phi::Place const&, phi::DenseTensor*)
+6   void paddle::memory::Copy<phi::Place, phi::Place>(phi::Place, void*, phi::Place, void const*, unsigned long, void*)
+7   void paddle::memory::Copy<phi::GPUPlace, phi::GPUPinnedPlace>(phi::GPUPlace, void*, phi::GPUPinnedPlace, void const*, unsigned long, void*)
+8   phi::backends::gpu::GpuMemcpySync(void*, void const*, unsigned long, cudaMemcpyKind)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683857796 (unix time) try "date -d @1683857796" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0x14443) received by PID 83124 (TID 0x7f5547ac2740) from PID 83011 ***]
+
+I0512 11:16:46.807585 86223 tcp_utils.cc:130] Successfully connected to 127.0.1.1:52892
+W0512 11:16:48.450930 86223 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 11:16:48.453459 86223 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 11:16:49,567] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=1.55s)
+creating index...
+index created!
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   egr::Backward(std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, bool)
+1   egr::RunBackward(std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, bool, bool, std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&, bool, std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> > const&)
+2   Conv2dGradNodeFinal::operator()(paddle::small_vector<std::vector<paddle::experimental::Tensor, std::allocator<paddle::experimental::Tensor> >, 15u>&, bool, bool)
+3   paddle::experimental::conv2d_grad(paddle::experimental::Tensor const&, paddle::experimental::Tensor const&, paddle::experimental::Tensor const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::string const&, int, std::vector<int, std::allocator<int> > const&, std::string const&, bool, int, bool, paddle::experimental::Tensor*, paddle::experimental::Tensor*)
+4   void phi::ConvCudnnGradKernel<float, phi::GPUContext>(phi::GPUContext const&, phi::DenseTensor const&, phi::DenseTensor const&, phi::DenseTensor const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::string const&, int, std::vector<int, std::allocator<int> > const&, std::string const&, bool, int, bool, phi::DenseTensor*, phi::DenseTensor*)
+5   phi::DnnWorkspaceHandle::RunFunc(std::function<void (void*)> const&, unsigned long)
+6   std::_Function_handler<void (void*), phi::ConvCudnnGradKernel<float, phi::GPUContext>(phi::GPUContext const&, phi::DenseTensor const&, phi::DenseTensor const&, phi::DenseTensor const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::string const&, int, std::vector<int, std::allocator<int> > const&, std::string const&, bool, int, bool, phi::DenseTensor*, phi::DenseTensor*)::{lambda(void*)#2}>::_M_invoke(std::_Any_data const&, void*&&)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683858891 (unix time) try "date -d @1683858891" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0x15069) received by PID 86223 (TID 0x7fb83c9f3740) from PID 86121 ***]
+
+I0512 11:46:34.027539 91855 tcp_utils.cc:130] Successfully connected to 127.0.1.1:41335
+W0512 11:46:35.645861 91855 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 11:46:35.648371 91855 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 11:46:36,215] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=0.13s)
+creating index...
+index created!
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   squeeze_ad_func(paddle::experimental::Tensor const&, paddle::experimental::IntArrayBase<paddle::experimental::Tensor>)
+1   paddle::experimental::squeeze_intermediate(paddle::experimental::Tensor const&, paddle::experimental::IntArrayBase<paddle::experimental::Tensor> const&)
+2   paddle::experimental::PrepareData(paddle::experimental::Tensor const&, phi::TensorArgDef const&, paddle::experimental::TransformFlag const&)
+3   paddle::experimental::TransformData(phi::DenseTensor*, phi::TensorArgDef const&, paddle::experimental::TransformFlag const&)
+4   paddle::experimental::TransDataPlace(phi::DenseTensor const&, phi::Place)
+5   paddle::framework::TensorCopySync(phi::DenseTensor const&, phi::Place const&, phi::DenseTensor*)
+6   void paddle::memory::Copy<phi::Place, phi::Place>(phi::Place, void*, phi::Place, void const*, unsigned long, void*)
+7   void paddle::memory::Copy<phi::GPUPlace, phi::GPUPinnedPlace>(phi::GPUPlace, void*, phi::GPUPinnedPlace, void const*, unsigned long, void*)
+8   phi::backends::gpu::GpuMemcpySync(void*, void const*, unsigned long, cudaMemcpyKind)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683860055 (unix time) try "date -d @1683860055" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0x1666c) received by PID 91855 (TID 0x7fd4d3fe9740) from PID 91756 ***]
+
+I0512 11:54:29.694887  5616 tcp_utils.cc:130] Successfully connected to 127.0.1.1:41153
+W0512 11:54:31.329737  5616 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 11:54:31.332305  5616 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 11:54:31,898] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=1.56s)
+creating index...
+index created!
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   phi::backends::gpu::GpuMemcpySync(void*, void const*, unsigned long, cudaMemcpyKind)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683863377 (unix time) try "date -d @1683863377" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0x1590) received by PID 5616 (TID 0x7f266eb25740) from PID 5520 ***]
+
+I0512 13:42:55.732220 24069 tcp_utils.cc:107] Retry to connect to 127.0.1.1:59451 while the server is not yet listening.
+I0512 13:42:58.732581 24069 tcp_utils.cc:130] Successfully connected to 127.0.1.1:59451
+W0512 13:43:00.368690 24069 gpu_resources.cc:61] Please NOTE: device: 1, GPU Compute Capability: 8.6, Driver API Version: 11.8, Runtime API Version: 11.4
+W0512 13:43:00.371273 24069 gpu_resources.cc:91] device: 1, cuDNN Version: 8.2.
+[2023-05-12 13:43:01,483] [    INFO] topology.py:215 - HybridParallelInfo: rank_id: 1, mp_degree: 1, sharding_degree: 1, pp_degree: 1, dp_degree: 2, mp_group: [1],  sharding_group: [1], pp_group: [1], dp_group: [0, 1], check/clip group: [1]
+loading annotations into memory...
+Done (t=1.55s)
+creating index...
+index created!
+
+
+--------------------------------------
+C++ Traceback (most recent call last):
+--------------------------------------
+0   phi::backends::gpu::GpuMemcpySync(void*, void const*, unsigned long, cudaMemcpyKind)
+
+----------------------
+Error Message Summary:
+----------------------
+FatalError: `Termination signal` is detected by the operating system.
+  [TimeInfo: *** Aborted at 1683867777 (unix time) try "date -d @1683867777" if you are using GNU date ***]
+  [SignalInfo: *** SIGTERM (@0x5da5) received by PID 24069 (TID 0x7fbff4d47740) from PID 23973 ***]
+

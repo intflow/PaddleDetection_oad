@@ -6,15 +6,25 @@ _BASE_: [
   '_base_/rtdetr_reader.yml',
 ]
 
-architecture: DETR
+architecture: DETR_oad_kpts
 weights: output/rtdetr_r50vd_6x_oad_kpts/model_final
 find_unused_parameters: True
 log_iter: 200
-epoch: 75
+epoch: 100
 add_rad: True
-add_kpts: 6 # 3 x 2 ( 3 : kepoint 갯수, 2 : (x, y) )
+add_kpts: True
 
-DETR:
+TrainReader:
+  sample_transforms:
+    - Decode: {}
+    - RandomDistort: {prob: 0.8}
+    - RandomExpand: {fill_value: [123.675, 116.28, 103.53]}
+    - RandomCrop: {prob: 0.8}
+  batch_size: 8
+
+DETR_oad_kpts:
+  backbone: ResNet
+  neck: HybridEncoder
   transformer: RTDETRTransformer_oad_kpts
   detr_head: DINOHEAD_oad_kpts
   post_process: DETRPostProcess_oad_kpts
@@ -33,14 +43,14 @@ RTDETRTransformer_oad_kpts:
   label_noise_ratio: 0.5
   box_noise_scale: 1.0
   learnt_init_query: False
-  out_kpts_layer: 6
+  out_kpts_num: 3
 
 DINOHEAD_oad_kpts:
   loss:
     name: DINOLoss_oad_kpts
-    loss_coeff: {class: 1, bbox: 5, giou: 2, rad: 1}
+    loss_coeff: {class: 1, bbox: 5, giou: 2, rad: 1, kpts: 5}
     aux_loss: True
     use_vfl: True
     matcher:
       name: HungarianMatcher_oad_kpts
-      matcher_coeff: {class: 2, bbox: 5, giou: 2, rad: 1}
+      matcher_coeff: {class: 2, bbox: 5, giou: 2, rad: 1, kpts: 2}

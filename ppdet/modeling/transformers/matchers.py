@@ -27,7 +27,7 @@ from scipy.optimize import linear_sum_assignment
 from ppdet.core.workspace import register, serializable
 from ..losses.iou_loss import GIoULoss
 from ..losses.smooth_l1_loss import SmoothL1Loss
-from ..losses.keypoint_loss import OKSLoss
+from ..losses.keypoint_loss import *
 from .utils import bbox_cxcywh_to_xyxy
 
 __all__ = ['HungarianMatcher', 'HungarianMatcher_oad', 'HungarianMatcher_oad_kpts']
@@ -362,7 +362,8 @@ class HungarianMatcher_oad_kpts(nn.Layer):
                      'giou': 2,
                      'mask': 1,
                      'dice': 1,
-                     'rad': 1
+                     'rad': 1,
+                     'kpts': 2
                  },
                  use_focal_loss=False,
                  with_mask=False,
@@ -383,7 +384,7 @@ class HungarianMatcher_oad_kpts(nn.Layer):
 
         self.giou_loss = GIoULoss()
         self.L1radian = SmoothL1Loss()
-        self.kpts_oksloss = OKSLoss()
+        self.oksloss_transformer = OKSLoss_Transformer()
 
     def forward(self,
                 boxes,
@@ -461,13 +462,16 @@ class HungarianMatcher_oad_kpts(nn.Layer):
         p_radian = paddle.tanh(out_rad.unsqueeze(1)) * 0.78539
         t_radian = tgt_rad.unsqueeze(0)
         cost_radian = self.L1radian(paddle.cos(p_radian), paddle.cos(t_radian)) + self.L1radian(paddle.sin(p_radian), paddle.sin(t_radian))
-        self.kpts_oksloss(out_kpts.unsqueeze(1), tgt_kpts.unsqueeze(1))
-
+        
+        cost_kpts = self.oksloss_transformer(out_kpts.unsqueeze(1), tgt_kpts.unsqueeze(0), None, None)
+        
+ 
         # Final cost matrix
         C = self.matcher_coeff['class'] * cost_class + \
             self.matcher_coeff['bbox'] * cost_bbox + \
             self.matcher_coeff['giou'] * cost_giou + \
-            self.matcher_coeff['rad'] * cost_radian.squeeze()
+            self.matcher_coeff['rad'] * cost_radian.squeeze() + \
+            self.matcher_coeff['kpts'] * cost_kpts
         # Compute the mask cost and dice cost
         if self.with_mask:
             assert (masks is not None and gt_mask is not None,

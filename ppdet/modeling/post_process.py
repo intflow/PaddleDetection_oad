@@ -931,12 +931,14 @@ class DETRPostProcess_oad_kpts(object):
             bbox_num (Tensor): The number of prediction boxes of each batch with
                 shape [bs], and is N.
         """
-        bboxes, logits, rad, masks = head_out
+        bboxes, logits, rad, kpts, kpts_score, masks = head_out
         if self.dual_queries:
             num_queries = logits.shape[1]
-            logits, bboxes, rad = logits[:, :int(num_queries // (self.dual_groups + 1)), :], \
+            logits, bboxes, rad, kpts, kpts_score = logits[:, :int(num_queries // (self.dual_groups + 1)), :], \
                                   bboxes[:, :int(num_queries // (self.dual_groups + 1)), :], \
-                                  rad[:, :int(num_queries // (self.dual_groups + 1)), :]
+                                  rad[:, :int(num_queries // (self.dual_groups + 1)), :], \
+                                  kpts[:, :int(num_queries // (self.dual_groups + 1)), :]. \
+                                  kpts_score[:, :int(num_queries // (self.dual_groups + 1)), :]
 
         bbox_pred = bbox_cxcywh_to_xyxy(bboxes)
         # calculate the original shape of the image
@@ -946,14 +948,20 @@ class DETRPostProcess_oad_kpts(object):
             # calculate the shape of the image with padding
             out_shape = pad_shape / im_shape * origin_shape
             out_shape = out_shape.flip(1).tile([1, 2]).unsqueeze(1)
+            out_kpts_shape = origin_shape.flip(1).tile([1, kpts.shape[-1] // 2]).unsqueeze(1)
         elif self.bbox_decode_type == 'origin':
             out_shape = origin_shape.flip(1).tile([1, 2]).unsqueeze(1)
+            out_kpts_shape = origin_shape.flip(1).tile([1, kpts.shape[-1] // 2]).unsqueeze(1)
         else:
             raise Exception(
                 f'Wrong `bbox_decode_type`: {self.bbox_decode_type}.')
         bbox_pred *= out_shape
+        kpts *= out_kpts_shape
 
         scores = F.sigmoid(logits) if self.use_focal_loss else F.softmax(
+            logits)[:, :, :-1]
+
+        kpts_score = F.sigmoid(kpts_score) if self.use_focal_loss else F.softmax(
             logits)[:, :, :-1]
 
         if not self.use_focal_loss:
@@ -977,6 +985,8 @@ class DETRPostProcess_oad_kpts(object):
             index = paddle.stack([batch_ind, index], axis=-1)
             bbox_pred = paddle.gather_nd(bbox_pred, index)
             rad = paddle.gather_nd(rad, index)
+            kpts = paddle.gather_nd(kpts, index)
+            kpts_score = paddle.gather_nd(kpts_score, index)
 
         mask_pred = None
         if self.with_mask:
@@ -1003,8 +1013,20 @@ class DETRPostProcess_oad_kpts(object):
                 bbox_pred, rad
             ],
             axis=-1)
+
+        kpts_split = kpts.reshape([kpts.shape[0], kpts.shape[1], -1, 2])
+        kpts_score_split = kpts_score.reshape([kpts_score.shape[0], kpts_score.shape[1], -1, 1])
+        kpts_pred = paddle.concat(
+                [
+                    kpts_split, kpts_score_split
+                ],
+                axis=-1
+            ).reshape([kpts.shape[0], kpts.shape[1], -1])
+        
         bbox_num = paddle.to_tensor(
             self.num_top_queries, dtype='int32').tile([bbox_pred.shape[0]])
         bbox_pred = bbox_pred.reshape([-1, 7]) # bbox(4) + label(1) + score(1) + rad(1)
         # bbox_pred = bbox_pred.reshape([-1, 6])
-        return bbox_pred, bbox_num, mask_pred
+        # kpts = kpts.reshape([-1, kpts.shape[-1]])
+        kpts_pred = kpts_pred.reshape([bbox_pred.shape[0],-1])
+        return bbox_pred, bbox_num, kpts_pred, mask_pred

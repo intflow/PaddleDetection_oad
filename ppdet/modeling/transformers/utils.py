@@ -251,7 +251,7 @@ def get_contrastive_denoising_training_group(targets,
     if active_radian:
         input_query_rad = paddle.zeros([bs, max_gt_num, 1])
     if active_kpts:
-        input_query_kpts = paddle.zeros([bs, max_gt_num, active_kpts])
+        input_query_kpts = paddle.zeros([bs, max_gt_num, active_kpts*2])
     pad_gt_mask = paddle.zeros([bs, max_gt_num])
     for i in range(bs):
         num_gt = num_gts[i]
@@ -322,9 +322,8 @@ def get_contrastive_denoising_training_group(targets,
         
         if active_kpts:
             # (4, 190, 6)
-            tmp_kpts_layer = active_kpts // 2
             diff_kpts3 = paddle.tile(input_query_bbox[..., 2:] * 0.5,
-                        [1, 1, tmp_kpts_layer]) * box_noise_scale
+                        [1, 1, active_kpts]) * box_noise_scale
             rand_sign_kpts = paddle.randint_like(input_query_kpts, 0, 2) * 2.0 - 1.0
             rand_part_kpts = paddle.rand(input_query_kpts.shape)
             rand_part_kpts = (rand_part_kpts + 1.0) * negative_gt_mask + rand_part_kpts * (

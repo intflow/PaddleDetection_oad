@@ -187,26 +187,37 @@ class Checkpointer(Callback):
                     for metric in self.model._metrics:
                         map_res = metric.get_results()
                         eval_func = "ap"
-                        if 'pose3d' in map_res:
-                            key = 'pose3d'
-                            eval_func = "mpjpe"
-                        elif 'bbox' in map_res:
-                            key = 'bbox'
-                        elif 'keypoint' in map_res:
-                            key = 'keypoint'
-                        else:
-                            key = 'mask'
-                        if key not in map_res:
-                            logger.warning("Evaluation results empty, this may be due to " \
-                                        "training iterations being too few or not " \
-                                        "loading the correct weights.")
-                            return
-                        if map_res[key][0] >= self.best_ap:
-                            self.best_ap = map_res[key][0]
-                            save_name = 'best_model'
-                            weight = self.weight.state_dict()
-                        logger.info("Best test {} {} is {:0.3f}.".format(
-                            key, eval_func, abs(self.best_ap)))
+                        if 'bbox' in map_res and 'keypoint' in map_res:
+                            keys = ['bbox', 'keypoint']
+                            weighted_ap = map_res['bbox'][0] * 0.7 + map_res['keypoint'][0] * 0.3
+                            if weighted_ap >= self.best_ap:
+                                self.best_ap = weighted_ap
+                                save_name = 'best_model'
+                                weight = self.weight.state_dict()
+                                logger.info("Best test {} + {} {} is {:0.3f}.".format(
+                                    keys[0], keys[1], eval_func, abs(self.best_ap)))
+                        
+                        else: 
+                            if 'pose3d' in map_res:
+                                key = 'pose3d'
+                                eval_func = "mpjpe"
+                            elif 'bbox' in map_res:
+                                key = 'bbox'
+                            elif 'keypoint' in map_res:
+                                key = 'keypoint'
+                            else:
+                                key = 'mask'
+                            if key not in map_res:
+                                logger.warning("Evaluation results empty, this may be due to " \
+                                            "training iterations being too few or not " \
+                                            "loading the correct weights.")
+                                return
+                            if map_res[key][0] >= self.best_ap:
+                                self.best_ap = map_res[key][0]
+                                save_name = 'best_model'
+                                weight = self.weight.state_dict()
+                            logger.info("Best test {} {} is {:0.3f}.".format(
+                                key, eval_func, abs(self.best_ap)))
             if weight:
                 if self.model.use_ema:
                     exchange_save_model = status.get('exchange_save_model',

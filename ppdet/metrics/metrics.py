@@ -83,7 +83,7 @@ class COCOMetric(Metric):
         self.save_prediction_only = kwargs.get('save_prediction_only', False)
         self.iou_type = kwargs.get('IouType', 'bbox')
         self.add_rad = kwargs.get('add_rad', False)
-        self.add_kpts = kwargs.get('add_kpts', 0)
+        self.add_kpts = kwargs.get('add_kpts', False)
 
         if not self.save_prediction_only:
             assert os.path.isfile(anno_file), \
@@ -147,8 +147,7 @@ class COCOMetric(Metric):
                     'bbox',
                     anno_file=self.anno_file,
                     classwise=self.classwise,
-                    add_rad=self.add_rad,
-                    add_kpts=self.add_kpts)
+                    add_rad=self.add_rad)
                 self.eval_results['bbox'] = bbox_stats
                 sys.stdout.flush()
 
@@ -168,7 +167,8 @@ class COCOMetric(Metric):
                     output,
                     'segm',
                     anno_file=self.anno_file,
-                    classwise=self.classwise)
+                    classwise=self.classwise,
+                    add_kpts=self.add_kpts)
                 self.eval_results['mask'] = seg_stats
                 sys.stdout.flush()
 
@@ -217,7 +217,8 @@ class COCOMetric(Metric):
                     anno_file=self.anno_file,
                     classwise=self.classwise,
                     sigmas=sigmas,
-                    use_area=use_area)
+                    use_area=use_area,
+                    add_kpts=True)
                 self.eval_results['keypoint'] = keypoint_stats
                 sys.stdout.flush()
 
