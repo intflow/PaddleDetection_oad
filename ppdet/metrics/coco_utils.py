@@ -21,14 +21,14 @@ import sys
 import numpy as np
 import itertools
 
-from ppdet.metrics.json_results import get_det_res, get_det_poly_res, get_seg_res, get_solov2_segm_res, get_keypoint_res, get_pose3d_res
+from ppdet.metrics.json_results import get_det_res, get_det_poly_res, get_seg_res, get_solov2_segm_res, get_keypoint_res, get_pose3d_res, get_keypoint_res_oad_kpts
 from ppdet.metrics.map_utils import draw_pr_curve
 
 from ppdet.utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 
-def get_infer_results(outs, catid, bias=0, add_rad=False):
+def get_infer_results(outs, catid, bias=0, add_rad=False, add_kpts=False):
     """
     Get result at the stage of inference.
     The output format is dictionary containing bbox or mask result.
@@ -61,8 +61,12 @@ def get_infer_results(outs, catid, bias=0, add_rad=False):
         infer_res['segm'] = get_solov2_segm_res(outs, im_id, catid)
 
     if 'keypoint' in outs:
-        infer_res['keypoint'] = get_keypoint_res(outs, im_id)
-        outs['bbox_num'] = [len(infer_res['keypoint'])]
+        if add_kpts:
+            infer_res['keypoint'] = get_keypoint_res_oad_kpts(outs, im_id)
+            outs['bbox_num'] = [len(infer_res['keypoint'])]
+        else:
+            infer_res['keypoint'] = get_keypoint_res(outs, im_id)
+            outs['bbox_num'] = [len(infer_res['keypoint'])]
 
     if 'pose3d' in outs:
         infer_res['pose3d'] = get_pose3d_res(outs, im_id)
@@ -79,7 +83,8 @@ def cocoapi_eval(jsonfile,
                  classwise=False,
                  sigmas=None,
                  use_area=True,
-                 add_rad=False):
+                 add_rad=False,
+                 add_kpts=False):
     """
     Args:
         jsonfile (str): Evaluation json file, eg: bbox.json, mask.json.
@@ -112,7 +117,7 @@ def cocoapi_eval(jsonfile,
         coco_eval.params.maxDets = list(max_dets)
     elif style == 'keypoints_crowd':
         coco_eval = COCOeval(coco_gt, coco_dt, style, sigmas, use_area)
-    else:
+    else: # bbox, keypoint
         # if문
         if add_rad: # add_rad일 경우에는 rbbox의 bbox(gt)와 dt(bbox)를 매칭시켜줘야 한다.
             for tmp_idx, _ in enumerate(coco_gt.dataset['annotations']):
@@ -120,7 +125,19 @@ def cocoapi_eval(jsonfile,
                 xmin, ymin = cx - witdh / 2, cy - height / 2 
                 coco_gt.dataset['annotations'][tmp_idx]['bbox'] = [xmin, ymin, witdh, height]
             
-        coco_eval = COCOeval(coco_gt, coco_dt, style)
+            coco_eval = COCOeval(coco_gt, coco_dt, style)
+        
+        if add_kpts:
+            # FIXME : 여기서 coco_gt의 클래스를 맞춰주면 되지 않을까?
+            # keypoint에서 추정하는 박스는 일반 bbox
+            # for tmp_idx, _ in enumerate(coco_gt.dataset['annotations']):
+            #     cx, cy, witdh, height = coco_gt.dataset['annotations'][tmp_idx]['rbbox'][:4]
+            #     xmin, ymin = cx - witdh / 2, cy - height / 2 
+            #     coco_gt.dataset['annotations'][tmp_idx]['bbox'] = [xmin, ymin, witdh, height]
+                
+            sigmas = np.array([.5]*(len(coco_gt.dataset['annotations'][0]['keypoints']) // 3))
+            coco_eval = COCOeval(coco_gt, coco_dt, style)
+            coco_eval.params.kpt_oks_sigmas = sigmas
     coco_eval.evaluate()
     coco_eval.accumulate()
     coco_eval.summarize()

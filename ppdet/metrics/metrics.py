@@ -83,6 +83,7 @@ class COCOMetric(Metric):
         self.save_prediction_only = kwargs.get('save_prediction_only', False)
         self.iou_type = kwargs.get('IouType', 'bbox')
         self.add_rad = kwargs.get('add_rad', False)
+        self.add_kpts = kwargs.get('add_kpts', False)
 
         if not self.save_prediction_only:
             assert os.path.isfile(anno_file), \
@@ -118,7 +119,7 @@ class COCOMetric(Metric):
                 self.clsid2catid[cls_id] = 0
 
         infer_results = get_infer_results(
-            outs, self.clsid2catid, bias=self.bias, add_rad=self.add_rad)
+            outs, self.clsid2catid, bias=self.bias, add_rad=self.add_rad, add_kpts=self.add_kpts)
         self.results['bbox'] += infer_results[
             'bbox'] if 'bbox' in infer_results else []
         self.results['mask'] += infer_results[
@@ -166,7 +167,8 @@ class COCOMetric(Metric):
                     output,
                     'segm',
                     anno_file=self.anno_file,
-                    classwise=self.classwise)
+                    classwise=self.classwise,
+                    add_kpts=self.add_kpts)
                 self.eval_results['mask'] = seg_stats
                 sys.stdout.flush()
 
@@ -215,7 +217,8 @@ class COCOMetric(Metric):
                     anno_file=self.anno_file,
                     classwise=self.classwise,
                     sigmas=sigmas,
-                    use_area=use_area)
+                    use_area=use_area,
+                    add_kpts=True)
                 self.eval_results['keypoint'] = keypoint_stats
                 sys.stdout.flush()
 

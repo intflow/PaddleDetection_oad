@@ -24,7 +24,7 @@ import pycocotools.mask as mask_util
 from ..initializer import linear_init_, constant_
 from ..transformers.utils import inverse_sigmoid
 
-__all__ = ['DETRHead', 'DeformableDETRHead', 'DINOHead', 'MaskDINOHead', 'DINOHEAD_oad']
+__all__ = ['DETRHead', 'DeformableDETRHead', 'DINOHead', 'MaskDINOHead', 'DINOHEAD_oad', 'DINOHEAD_oad_kpts']
 
 
 class MLP(nn.Layer):
@@ -652,3 +652,157 @@ class DINOHEAD_oad(nn.Layer):
                 dn_meta=dn_meta)
         else:
             return (dec_out_bboxes[-1], dec_out_logits[-1], dec_out_rads[-1], None)
+        
+@register
+class DINOHEAD_oad_kpts(nn.Layer):
+    __inject__ = ['loss']
+
+    def __init__(self, loss='DINOLoss_oad_kpts'):
+        super(DINOHEAD_oad_kpts, self).__init__()
+        self.loss = loss
+
+    def forward(self, out_transformer, body_feats, inputs=None):
+        (dec_out_bboxes, dec_out_rads, dec_out_kpts, dec_out_logits, dec_out_kpts_score,
+         enc_topk_bboxes, enc_topk_rads, enc_topk_kpts, enc_topk_logits, enc_topk_kpts_score,
+         dn_meta) = out_transformer
+        if self.training:
+            assert inputs is not None
+            assert 'gt_bbox' in inputs and 'gt_class' in inputs and 'gt_rad' in inputs and 'gt_keypoint' in inputs
+
+            if dn_meta is not None:
+                if isinstance(dn_meta, list):
+                    # 이쪽으로는 안오는 듯 (fix 안함)
+                    dual_groups = len(dn_meta) - 1
+                    dec_out_bboxes = paddle.split(
+                        dec_out_bboxes, dual_groups + 1, axis=2)
+                    dec_out_rads = paddle.split(
+                        dec_out_rads, dual_groups + 1, axis=2)
+                    dec_out_kpts = paddle.split(
+                        dec_out_kpts, dual_groups + 1, axis=2)
+                    dec_out_logits = paddle.split(
+                        dec_out_logits, dual_groups + 1, axis=2)
+                    enc_topk_bboxes = paddle.split(
+                        enc_topk_bboxes, dual_groups + 1, axis=1)
+                    enc_topk_rads = paddle.split(
+                        enc_topk_rads, dual_groups + 1, axis=1)
+                    enc_topk_kpts = paddle.split(
+                        enc_topk_kpts, dual_groups + 1, axis=1)
+                    enc_topk_logits = paddle.split(
+                        enc_topk_logits, dual_groups + 1, axis=1)
+
+                    dec_out_bboxes_list = []
+                    dec_out_rads_list = []
+                    dec_out_kpts_list = []
+                    dec_out_logits_list = []
+                    dn_out_bboxes_list = []
+                    dn_out_rads_list = []
+                    dn_out_kpts_list = []
+                    dn_out_logits_list = []
+                    loss = {}
+                    for g_id in range(dual_groups + 1):
+                        if dn_meta[g_id] is not None:
+                            dn_out_bboxes_gid, dec_out_bboxes_gid = paddle.split(
+                                dec_out_bboxes[g_id],
+                                dn_meta[g_id]['dn_num_split'],
+                                axis=2)
+                            dn_out_rads_gid, dec_out_rads_gid = paddle.split(
+                                dec_out_rads[g_id],
+                                dn_meta[g_id]['dn_num_split'],
+                                axis=2)
+                            dn_out_kpts_gid, dec_out_kpts_gid = paddle.split(
+                                dec_out_kpts[g_id],
+                                dn_meta[g_id]['dn_num_split'],
+                                axis=2)
+                            dn_out_logits_gid, dec_out_logits_gid = paddle.split(
+                                dec_out_logits[g_id],
+                                dn_meta[g_id]['dn_num_split'],
+                                axis=2)
+                        else:
+                            dn_out_bboxes_gid, dn_out_rads_gid, dn_out_kpts_gid, dn_out_logits_gid = None, None, None, None
+                            dec_out_bboxes_gid = dec_out_bboxes[g_id]
+                            dec_out_rads_gid = dec_out_rads[g_id]
+                            dec_out_kpts_gid = dec_out_kpts[g_id]
+                            dec_out_logits_gid = dec_out_logits[g_id]
+                        out_bboxes_gid = paddle.concat([
+                            enc_topk_bboxes[g_id].unsqueeze(0),
+                            dec_out_bboxes_gid
+                        ])
+                        out_rads_gid = paddle.concat([
+                            enc_topk_rads[g_id].unsqueeze(0),
+                            dec_out_rads_gid
+                        ])
+                        out_kpts_gid = paddle.concat([
+                            enc_topk_kpts[g_id].unsqueeze(0),
+                            dec_out_kpts_gid
+                        ])
+                        out_logits_gid = paddle.concat([
+                            enc_topk_logits[g_id].unsqueeze(0),
+                            dec_out_logits_gid
+                        ])
+                        loss_gid = self.loss(
+                            out_bboxes_gid,
+                            out_rads_gid,
+                            out_kpts_gid,
+                            out_logits_gid,
+                            inputs['gt_bbox'],
+                            inputs['gt_rad'],
+                            inputs['gt_keypoint'],
+                            inputs['gt_class'],
+                            dn_out_bboxes=dn_out_bboxes_gid,
+                            dn_out_rads=dn_out_rads_gid,
+                            dn_out_kpts=dn_out_kpts_gid,
+                            dn_out_logits=dn_out_logits_gid,
+                            dn_meta=dn_meta[g_id])
+                        # sum loss
+                        for key, value in loss_gid.items():
+                            loss.update({
+                                key: loss.get(key, paddle.zeros([1])) + value
+                            })
+
+                    # average across (dual_groups + 1)
+                    for key, value in loss.items():
+                        loss.update({key: value / (dual_groups + 1)})
+                    return loss
+                else:
+                    dn_out_bboxes, dec_out_bboxes = paddle.split(
+                        dec_out_bboxes, dn_meta['dn_num_split'], axis=2)
+                    dn_out_rads, dec_out_rads = paddle.split(
+                        dec_out_rads, dn_meta['dn_num_split'], axis=2)
+                    dn_out_kpts, dec_out_kpts = paddle.split(
+                        dec_out_kpts, dn_meta['dn_num_split'], axis=2)
+                    dn_out_logits, dec_out_logits = paddle.split(
+                        dec_out_logits, dn_meta['dn_num_split'], axis=2)
+                    dn_out_kpts_score, dec_out_kpts_score = paddle.split(
+                        dec_out_kpts_score, dn_meta['dn_num_split'], axis=2)
+            else:
+                dn_out_bboxes, dn_out_rads, dn_out_kpts, dn_out_logits, dn_out_kpts_score = None, None, None, None, None
+
+            out_bboxes = paddle.concat(
+                [enc_topk_bboxes.unsqueeze(0), dec_out_bboxes])
+            out_rads = paddle.concat(
+                [enc_topk_rads.unsqueeze(0), dec_out_rads])
+            out_kpts = paddle.concat(
+                [enc_topk_kpts.unsqueeze(0), dec_out_kpts])
+            out_logits = paddle.concat(
+                [enc_topk_logits.unsqueeze(0), dec_out_logits])
+            out_kpts_score = paddle.concat(
+                [enc_topk_kpts_score.unsqueeze(0), dec_out_kpts_score])
+
+            return self.loss(
+                out_bboxes,
+                out_rads,
+                out_kpts,
+                out_logits,
+                out_kpts_score,
+                inputs['gt_bbox'],
+                inputs['gt_rad'],
+                inputs['gt_keypoint'],
+                inputs['gt_class'],
+                dn_out_bboxes=dn_out_bboxes,
+                dn_out_rads=dn_out_rads,
+                dn_out_kpts=dn_out_kpts,
+                dn_out_logits=dn_out_logits,
+                dn_out_kpts_score=dn_out_kpts_score,
+                dn_meta=dn_meta)
+        else:
+            return (dec_out_bboxes[-1], dec_out_logits[-1], dec_out_rads[-1], dec_out_kpts[-1], dec_out_kpts_score[-1], None)

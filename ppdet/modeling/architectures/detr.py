@@ -20,7 +20,7 @@ import paddle
 from .meta_arch import BaseArch
 from ppdet.core.workspace import register, create
 
-__all__ = ['DETR']
+__all__ = ['DETR', 'DETR_oad', 'DETR_oad_kpts']
 # Deformable DETR, DINO use the same architecture as DETR
 
 
@@ -98,6 +98,97 @@ class DETR(BaseArch):
         else:
             preds = self.detr_head(out_transformer, body_feats)
             if self.exclude_post_process:
+                bbox, bbox_num, mask = preds
+            else:
+                bbox, bbox_num, mask = self.post_process(
+                    preds, self.inputs['im_shape'], self.inputs['scale_factor'],
+                    paddle.shape(self.inputs['image'])[2:])
+
+            output = {'bbox': bbox, 'bbox_num': bbox_num}
+            if self.with_mask:
+                output['mask'] = mask
+            return output
+
+    def get_loss(self):
+        return self._forward()
+
+    def get_pred(self):
+        return self._forward()
+    
+@register
+class DETR_oad(BaseArch):
+    __category__ = 'architecture'
+    __inject__ = ['post_process']
+    __shared__ = ['with_mask', 'exclude_post_process']
+
+    def __init__(self,
+                 backbone,
+                 transformer='DETRTransformer_oad',
+                 detr_head='DETRHead_oad',
+                 neck=None,
+                 post_process='DETRPostProcess_oad',
+                 with_mask=False,
+                 exclude_post_process=False):
+        super(DETR_oad, self).__init__()
+        self.backbone = backbone
+        self.transformer = transformer
+        self.detr_head = detr_head
+        self.neck = neck
+        self.post_process = post_process
+        self.with_mask = with_mask
+        self.exclude_post_process = exclude_post_process
+
+    @classmethod
+    def from_config(cls, cfg, *args, **kwargs):
+        # backbone
+        backbone = create(cfg['backbone'])
+        # neck
+        kwargs = {'input_shape': backbone.out_shape}
+        neck = create(cfg['neck'], **kwargs) if cfg['neck'] else None
+
+        # transformer
+        if neck is not None:
+            kwargs = {'input_shape': neck.out_shape}
+        transformer = create(cfg['transformer'], **kwargs)
+        # head
+        kwargs = {
+            'hidden_dim': transformer.hidden_dim,
+            'nhead': transformer.nhead,
+            'input_shape': backbone.out_shape
+        }
+        detr_head = create(cfg['detr_head'], **kwargs)
+
+        return {
+            'backbone': backbone,
+            'transformer': transformer,
+            "detr_head": detr_head,
+            "neck": neck
+        }
+
+    def _forward(self):
+        # Backbone
+        body_feats = self.backbone(self.inputs)
+
+        # Neck
+        if self.neck is not None:
+            body_feats = self.neck(body_feats)
+
+        # Transformer
+        pad_mask = self.inputs.get('pad_mask', None)
+        out_transformer = self.transformer(body_feats, pad_mask, self.inputs)
+
+        # DETR Head
+        if self.training:
+            detr_losses = self.detr_head(out_transformer, body_feats,
+                                         self.inputs)
+            detr_losses.update({
+                'loss': paddle.add_n(
+                    [v for k, v in detr_losses.items() if 'log' not in k])
+            })
+            return detr_losses
+        else:
+            preds = self.detr_head(out_transformer, body_feats)
+            if self.exclude_post_process:
                 bbox, bbox_num, rad, mask = preds
             else:
                 bbox, bbox_num, mask = self.post_process(
@@ -105,6 +196,98 @@ class DETR(BaseArch):
                     paddle.shape(self.inputs['image'])[2:])
 
             output = {'bbox': bbox, 'bbox_num': bbox_num}
+            if self.with_mask:
+                output['mask'] = mask
+            return output
+
+    def get_loss(self):
+        return self._forward()
+
+    def get_pred(self):
+        return self._forward()
+
+@register
+class DETR_oad_kpts(BaseArch):
+    __category__ = 'architecture'
+    __inject__ = ['post_process']
+    __shared__ = ['with_mask', 'exclude_post_process']
+
+    def __init__(self,
+                 backbone,
+                 transformer='DETRTransformer',
+                 detr_head='DETRHead',
+                 neck=None,
+                 post_process='DETRPostProcess',
+                 with_mask=False,
+                 exclude_post_process=False):
+        super(DETR_oad_kpts, self).__init__()
+        self.backbone = backbone
+        self.transformer = transformer
+        self.detr_head = detr_head
+        self.neck = neck
+        self.post_process = post_process
+        self.with_mask = with_mask
+        self.exclude_post_process = exclude_post_process
+
+    @classmethod
+    def from_config(cls, cfg, *args, **kwargs):
+        # backbone
+        backbone = create(cfg['backbone'])
+        # neck
+        kwargs = {'input_shape': backbone.out_shape}
+        neck = create(cfg['neck'], **kwargs) if cfg['neck'] else None
+
+        # transformer
+        if neck is not None:
+            kwargs = {'input_shape': neck.out_shape}
+        transformer = create(cfg['transformer'], **kwargs)
+        # head
+        kwargs = {
+            'hidden_dim': transformer.hidden_dim,
+            'nhead': transformer.nhead,
+            'input_shape': backbone.out_shape
+        }
+        detr_head = create(cfg['detr_head'], **kwargs)
+
+        return {
+            'backbone': backbone,
+            'transformer': transformer,
+            "detr_head": detr_head,
+            "neck": neck
+        }
+
+    def _forward(self):
+        # Backbone
+        body_feats = self.backbone(self.inputs)
+
+        # Neck
+        if self.neck is not None:
+            body_feats = self.neck(body_feats)
+
+        # Transformer
+        pad_mask = self.inputs.get('pad_mask', None)
+        out_transformer = self.transformer(body_feats, pad_mask, self.inputs)
+
+        # DETR Head
+        if self.training:
+            detr_losses = self.detr_head(out_transformer, body_feats,
+                                         self.inputs)
+            detr_losses.update({
+                'loss': paddle.add_n(
+                    [v for k, v in detr_losses.items() if 'log' not in k])
+            })
+            return detr_losses
+        else:
+            preds = self.detr_head(out_transformer, body_feats)
+            if self.exclude_post_process:
+                bbox, bbox_num, kpts, mask = preds
+            else:
+                # REVIEW : pred를 mAP 계산할 수 있게 form을 변경해주는 역할
+                bbox, bbox_num, kpts, mask = self.post_process(
+                    preds, self.inputs['im_shape'], self.inputs['scale_factor'],
+                    paddle.shape(self.inputs['image'])[2:])
+
+            output = {'bbox': bbox, 'bbox_num': bbox_num, 'keypoint': kpts}
             if self.with_mask:
                 output['mask'] = mask
             return output

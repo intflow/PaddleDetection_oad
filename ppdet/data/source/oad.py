@@ -163,7 +163,7 @@ class OADDataSet(DetDataset):
                     x2 = cx + box_w * 0.5
                     y2 = cy + box_h * 0.5
                     eps = 1e-5
-                    # rbboxes.append(inst)
+                    
                     if inst['area'] > 0 and x2 - x1 > eps and y2 - y1 > eps:
                         inst['clean_bbox'] = [
                             round(float(x), 3) for x in [x1, y1, x2, y2]
@@ -182,7 +182,10 @@ class OADDataSet(DetDataset):
 
                 gt_bbox = np.zeros((num_bbox, 4), dtype=np.float32)
                 gt_rad = np.zeros((num_bbox, 1), dtype=np.float32)
+                # FIXME : 나중에 꼭 고쳐야함 -> keypoint 갯수에 맞게
                 gt_keypoint = np.zeros((num_bbox, 6), dtype=np.float32)
+                # gt_keypoint_mask = np.zeros((num_bbox, 3), dtype=np.float32)
+                # gt_keypoint = np.zeros((num_bbox, len(rbboxes[0]['keypoints'])), dtype=np.float32)
                 gt_class = np.zeros((num_bbox, 1), dtype=np.int32)
                 gt_pose = np.zeros((num_bbox, 1), dtype=np.int32)
                 is_crowd = np.zeros((num_bbox, 1), dtype=np.int32)
@@ -205,6 +208,7 @@ class OADDataSet(DetDataset):
                     rbox['rbbox'][3] += rbox['rbbox'][1]
                     gt_bbox[i, :] = rbox['rbbox'][:4]
                     gt_rad[i, :] = rbox['rbbox'][4]
+                    # gt_keypoint[i, :] = rbox['keypoints']
                     gt_keypoint[i, :] = [rbox['keypoints'][j] for j in range(len(rbox['keypoints'])) if (j+1) % 3 != 0]
                     is_crowd[i][0] = rbox['iscrowd']
                     # check RLE format 
@@ -303,5 +307,8 @@ class OADDataSet(DetDataset):
             h_tmp = height
             height = width
             width = h_tmp
+            
+        if rad < -0.25*np.pi or rad > 0.25*np.pi:
+            print("oad.py : rad ERROR")
             
         return [cx,cy,width,height,rad]

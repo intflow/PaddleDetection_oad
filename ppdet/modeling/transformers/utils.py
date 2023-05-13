@@ -222,13 +222,24 @@ def get_contrastive_denoising_training_group(targets,
                                              num_denoising=100,
                                              label_noise_ratio=0.5,
                                              box_noise_scale=1.0,
-                                             active_radian=False):
+                                             active_radian=False,
+                                             active_kpts=0):
     if num_denoising <= 0:
-        return None, None, None, None
+        if active_radian and active_kpts > 0:
+            return None, None, None, None, None, None
+        elif active_radian and active_kpts == 0:
+            return None, None, None, None, None
+        else:
+            return None, None, None, None
     num_gts = [len(t) for t in targets["gt_class"]]
     max_gt_num = max(num_gts)
     if max_gt_num == 0:
-        return None, None, None, None
+        if active_radian and active_kpts > 0:
+            return None, None, None, None, None, None
+        elif active_radian and active_kpts == 0:
+            return None, None, None, None, None
+        else:
+            return None, None, None, None
 
     num_group = num_denoising // max_gt_num
     num_group = 1 if num_group == 0 else num_group
@@ -239,6 +250,8 @@ def get_contrastive_denoising_training_group(targets,
     input_query_bbox = paddle.zeros([bs, max_gt_num, 4])
     if active_radian:
         input_query_rad = paddle.zeros([bs, max_gt_num, 1])
+    if active_kpts:
+        input_query_kpts = paddle.zeros([bs, max_gt_num, active_kpts*2])
     pad_gt_mask = paddle.zeros([bs, max_gt_num])
     for i in range(bs):
         num_gt = num_gts[i]
@@ -247,12 +260,16 @@ def get_contrastive_denoising_training_group(targets,
             input_query_bbox[i, :num_gt] = targets["gt_bbox"][i]
             if active_radian:
                 input_query_rad[i, :num_gt] = targets["gt_rad"][i]
+            if active_kpts:
+                input_query_kpts[i, :num_gt] = targets["gt_keypoint"][i]
             pad_gt_mask[i, :num_gt] = 1
     # each group has positive and negative queries.
     input_query_class = input_query_class.tile([1, 2 * num_group])
     input_query_bbox = input_query_bbox.tile([1, 2 * num_group, 1])
     if active_radian:
         input_query_rad = input_query_rad.tile([1, 2 * num_group, 1])
+    if active_kpts:
+        input_query_kpts = input_query_kpts.tile([1, 2 * num_group, 1])
     pad_gt_mask = pad_gt_mask.tile([1, 2 * num_group])
     # positive and negative mask
     negative_gt_mask = paddle.zeros([bs, max_gt_num * 2, 1])
@@ -303,6 +320,18 @@ def get_contrastive_denoising_training_group(targets,
             rand_rad = (paddle.rand(input_query_rad.shape) * 2.0 - 1.0) * 0.78539 * box_noise_scale * 0.05
             input_query_rad += rand_rad
         
+        if active_kpts:
+            # (4, 190, 6)
+            diff_kpts3 = paddle.tile(input_query_bbox[..., 2:] * 0.5,
+                        [1, 1, active_kpts]) * box_noise_scale
+            rand_sign_kpts = paddle.randint_like(input_query_kpts, 0, 2) * 2.0 - 1.0
+            rand_part_kpts = paddle.rand(input_query_kpts.shape)
+            rand_part_kpts = (rand_part_kpts + 1.0) * negative_gt_mask + rand_part_kpts * (
+                1 - negative_gt_mask)
+            rand_part_kpts *= rand_sign_kpts
+            input_query_kpts += rand_part_kpts * diff_kpts3
+            input_query_kpts.clip_(min=0.0, max=1.0)
+            input_query_kpts = inverse_sigmoid(input_query_kpts)
 
     class_embed = paddle.concat(
         [class_embed, paddle.zeros([1, class_embed.shape[-1]])])
@@ -333,7 +362,10 @@ def get_contrastive_denoising_training_group(targets,
         "dn_num_group": num_group,
         "dn_num_split": [num_denoising, num_queries]
     }
-    if active_radian:
+    
+    if active_radian and active_kpts > 0:
+        return input_query_class, input_query_bbox, input_query_rad, input_query_kpts, attn_mask, dn_meta
+    elif active_radian and active_kpts == 0:
         return input_query_class, input_query_bbox, input_query_rad, attn_mask, dn_meta
     else:
         return input_query_class, input_query_bbox, attn_mask, dn_meta
