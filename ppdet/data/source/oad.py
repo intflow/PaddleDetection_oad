@@ -282,23 +282,23 @@ class OADDataSet(DetDataset):
             rad += np.pi*2
             
         #-pi ~ pi
-        if rad >= np.pi:
+        if rad > np.pi:
             rad = -1*(2*np.pi - rad)
             
         ####keep radians between -05pi ~ 05pi
-        if rad >= np.pi*0.5:
+        if rad > np.pi*0.5:
             rad = rad - np.pi
-        elif rad <= np.pi*(-0.5):
+        elif rad < np.pi*(-0.5):
             rad = rad  + np.pi
             
         #Regularize pi range from -0.25pi~0.25pi
-        if rad >= 0.25*np.pi:
+        if rad > 0.25*np.pi:
             rad -= 0.5*np.pi
             h_tmp = height
             height = width
             width = h_tmp
             
-        if rad <= -0.25*np.pi:
+        if rad < -0.25*np.pi:
             rad += 0.5*np.pi
             h_tmp = height
             height = width

@@ -701,7 +701,7 @@ class DETRLoss_oad(nn.Layer):
 
         src_rad, target_rad = self._get_src_target_assign(rads, gt_rad,
                                                             match_indices)
-        src_rad = paddle.tanh(src_rad) * 0.78539
+        ##src_rad = paddle.tanh(src_rad) * 0.78539
         loss[name_rad] = self.loss_coeff['rad'] * \
         (F.smooth_l1_loss(paddle.cos(src_rad), paddle.cos(target_rad), reduction='sum') +
          F.smooth_l1_loss(paddle.sin(src_rad), paddle.sin(target_rad), reduction='sum')) / num_gts

@@ -584,7 +584,7 @@ class TransformerDecoder_oad(nn.Layer):
             inter_ref_bbox = F.sigmoid(bbox_head[i](output) + inverse_sigmoid(
                 ref_points_detach))
             
-            inter_ref_radian = radian_head[i](output) + ref_radian_detach
+            inter_ref_radian = F.tanh(radian_head[i](output) + ref_radian_detach) * 0.78539
 
             if self.training:
                 dec_out_logits.append(score_head[i](output))
@@ -595,7 +595,8 @@ class TransformerDecoder_oad(nn.Layer):
                     dec_out_bboxes.append(
                         F.sigmoid(bbox_head[i](output) + inverse_sigmoid(
                             ref_points)))
-                    dec_out_radian.append(radian_head[i](output) + ref_radian)
+                    dec_out_radian.append(
+                        F.tanh(radian_head[i](output) + ref_radian) * 0.78539)
 
             elif i == self.eval_idx:
                 dec_out_logits.append(score_head[i](output))

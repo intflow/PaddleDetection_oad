@@ -287,7 +287,8 @@ class HungarianMatcher_oad(nn.Layer):
             bbox_cxcywh_to_xyxy(tgt_bbox.unsqueeze(0))).squeeze(-1)
         
         # radian loss
-        p_radian = paddle.tanh(out_radian.unsqueeze(1)) * 0.78539
+        ##p_radian = paddle.tanh(out_radian.unsqueeze(1)) * 0.78539
+        p_radian = out_radian.unsqueeze(1)
         t_radian = tgt_radian.unsqueeze(0)
         cost_radian = self.L1radian(paddle.cos(p_radian), paddle.cos(t_radian)) + self.L1radian(paddle.sin(p_radian), paddle.sin(t_radian))
 

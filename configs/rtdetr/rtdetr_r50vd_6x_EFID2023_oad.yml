@@ -7,7 +7,7 @@ _BASE_: [
 ]
 
 architecture: DETR
-weights: output/rtdetr_r50vd_6x_oad/model_final
+weights: output/rtdetr_r50vd_6x_oad_test/model_final
 find_unused_parameters: True
 log_iter: 200
 epoch: 200
