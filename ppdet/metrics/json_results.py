@@ -170,7 +170,7 @@ def get_keypoint_res(results, im_id):
             anns.append(ann)
     return anns
 
-def get_keypoint_res_oad_kpts(results, im_id):
+def get_keypoint_res_oadkpt(results, im_id):
     anns = []
     preds = results['keypoint']
     bbox_score = results['bbox'][:,1]
@@ -180,6 +180,7 @@ def get_keypoint_res_oad_kpts(results, im_id):
         score = bbox_score[idx]
         # FIXME : category_id가 하나밖에 없다 = class는 한개만 적용한다.
         kpt = kpt.flatten()
+        kpt = np.hstack((kpt.reshape(-1, 2), np.full((kpt.reshape(-1, 2).shape[0], 1), 2))).flatten()
         ann = {
                 'image_id': image_id,
                 'category_id': 0,  # XXX hard code

@@ -22,7 +22,7 @@ docker pull intflow/paddle_detection:TensorRT8.2.1
 
 #Run Dockers for YOLOXOAD
 sudo docker run --name paddle_detection \
---gpus all --rm -p 6435:6435 \
+--gpus all --rm -p 6436:6436 \
 --mount type=bind,src=/home/intflow/works,dst=/works \
 --mount type=bind,src=/DL_data_big,dst=/data \
 --mount type=bind,src=/DL_data,dst=/DL_data \

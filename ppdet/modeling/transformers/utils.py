@@ -313,7 +313,7 @@ def get_contrastive_denoising_training_group(targets,
         input_query_bbox = bbox_xyxy_to_cxcywh(known_bbox)
         input_query_bbox = inverse_sigmoid(input_query_bbox)
         
-        # FIXME : Denoising 전략: 딱 하나의 정답이 아닌 적당한 noisy GT를 디코더에 입력하고 모델이 진짜 GT를 복원하도록 학습함
+        # REVIEW : Denoising 전략: 딱 하나의 정답이 아닌 적당한 noisy GT를 디코더에 입력하고 모델이 진짜 GT를 복원하도록 학습함
         #We show that the slow convergence results from the instability of bipartite graph matching which causes inconsistent optimization goals in early training stages. To address this issue, except for the Hungarian loss, our method additionally feeds ground-truth bounding boxes with noises into Transformer decoder and trains the model to reconstruct the original boxes, which effectively reduces the bipartite graph matching difficulty and leads to a faster convergence.
         #https://dhpark1212.tistory.com/entry/%EC%9D%B4%EB%B6%84-%EA%B7%B8%EB%9E%98%ED%94%84-vs-%EC%9D%B4%EB%B6%84-%EB%A7%A4%EC%B9%AD
         if active_radian:
@@ -321,15 +321,14 @@ def get_contrastive_denoising_training_group(targets,
             input_query_rad += rand_rad
         
         if active_kpts:
-            # (4, 190, 6)
-            diff_kpts3 = paddle.tile(input_query_bbox[..., 2:] * 0.5,
+            diff_kpts = paddle.tile(input_query_bbox[..., 2:] * 0.5,
                         [1, 1, active_kpts]) * box_noise_scale
             rand_sign_kpts = paddle.randint_like(input_query_kpts, 0, 2) * 2.0 - 1.0
             rand_part_kpts = paddle.rand(input_query_kpts.shape)
             rand_part_kpts = (rand_part_kpts + 1.0) * negative_gt_mask + rand_part_kpts * (
                 1 - negative_gt_mask)
             rand_part_kpts *= rand_sign_kpts
-            input_query_kpts += rand_part_kpts * diff_kpts3
+            input_query_kpts += rand_part_kpts * diff_kpts
             input_query_kpts.clip_(min=0.0, max=1.0)
             input_query_kpts = inverse_sigmoid(input_query_kpts)
 

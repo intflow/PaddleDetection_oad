@@ -6,27 +6,25 @@ _BASE_: [
   '_base_/rtdetr_reader.yml',
 ]
 
-architecture: DETR_oad_kpts
-weights: output/rtdetr_r50vd_6x_oad_kpts/model_final
+architecture: DETR_oadkpt
+weights: output/rtdetr_r50vd_6x_EFID2023_oadkpt/model_final
 find_unused_parameters: True
 log_iter: 200
-epoch: 50
+epoch: 200
 add_rad: True
 add_kpts: True
 
 TrainReader:
-  sample_transforms:
-    - Decode: {}
   batch_size: 8
 
-DETR_oad_kpts:
+DETR_oadkpt:
   backbone: ResNet
   neck: HybridEncoder
-  transformer: RTDETRTransformer_oad_kpts
-  detr_head: DINOHEAD_oad_kpts
-  post_process: DETRPostProcess_oad_kpts
+  transformer: RTDETRTransformer_oadkpt
+  detr_head: DINOHEAD_oadkpt
+  post_process: DETRPostProcess_oadkpt
 
-RTDETRTransformer_oad_kpts:
+RTDETRTransformer_oadkpt:
   num_queries: 300
   position_embed_type: sine
   feat_strides: [8, 16, 32]
@@ -40,14 +38,14 @@ RTDETRTransformer_oad_kpts:
   label_noise_ratio: 0.5
   box_noise_scale: 1.0
   learnt_init_query: False
-  out_kpts_num: 3
+  kpts_num: 3
 
-DINOHEAD_oad_kpts:
+DINOHEAD_oadkpt:
   loss:
-    name: DINOLoss_oad_kpts
-    loss_coeff: {class: 1, bbox: 5, giou: 2, rad: 1, kpts: 5}
+    name: DINOLoss_oadkpt
+    loss_coeff: {class: 1, bbox: 5, giou: 2, rad: 1, kpts: 3}
     aux_loss: True
     use_vfl: True
     matcher:
-      name: HungarianMatcher_oad_kpts
-      matcher_coeff: {class: 2, bbox: 5, giou: 2, rad: 1, kpts: 2}
+      name: HungarianMatcher_oadkpt
+      matcher_coeff: {class: 2, bbox: 5, giou: 2, rad: 1, kpts: 3}

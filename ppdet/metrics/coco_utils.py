@@ -21,7 +21,7 @@ import sys
 import numpy as np
 import itertools
 
-from ppdet.metrics.json_results import get_det_res, get_det_poly_res, get_seg_res, get_solov2_segm_res, get_keypoint_res, get_pose3d_res, get_keypoint_res_oad_kpts
+from ppdet.metrics.json_results import get_det_res, get_det_poly_res, get_seg_res, get_solov2_segm_res, get_keypoint_res, get_pose3d_res, get_keypoint_res_oadkpt
 from ppdet.metrics.map_utils import draw_pr_curve
 
 from ppdet.utils.logger import setup_logger
@@ -62,7 +62,7 @@ def get_infer_results(outs, catid, bias=0, add_rad=False, add_kpts=False):
 
     if 'keypoint' in outs:
         if add_kpts:
-            infer_res['keypoint'] = get_keypoint_res_oad_kpts(outs, im_id)
+            infer_res['keypoint'] = get_keypoint_res_oadkpt(outs, im_id)
             outs['bbox_num'] = [len(infer_res['keypoint'])]
         else:
             infer_res['keypoint'] = get_keypoint_res(outs, im_id)

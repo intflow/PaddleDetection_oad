@@ -24,7 +24,7 @@ import pycocotools.mask as mask_util
 from ..initializer import linear_init_, constant_
 from ..transformers.utils import inverse_sigmoid
 
-__all__ = ['DETRHead', 'DeformableDETRHead', 'DINOHead', 'MaskDINOHead', 'DINOHEAD_oad', 'DINOHEAD_oad_kpts']
+__all__ = ['DETRHead', 'DeformableDETRHead', 'DINOHead', 'MaskDINOHead', 'DINOHEAD_oad', 'DINOHEAD_oadkpt']
 
 
 class MLP(nn.Layer):
@@ -654,16 +654,16 @@ class DINOHEAD_oad(nn.Layer):
             return (dec_out_bboxes[-1], dec_out_logits[-1], dec_out_rads[-1], None)
         
 @register
-class DINOHEAD_oad_kpts(nn.Layer):
+class DINOHEAD_oadkpt(nn.Layer):
     __inject__ = ['loss']
 
-    def __init__(self, loss='DINOLoss_oad_kpts'):
-        super(DINOHEAD_oad_kpts, self).__init__()
+    def __init__(self, loss='DINOLoss_oadkpt'):
+        super(DINOHEAD_oadkpt, self).__init__()
         self.loss = loss
 
     def forward(self, out_transformer, body_feats, inputs=None):
-        (dec_out_bboxes, dec_out_rads, dec_out_kpts, dec_out_logits, dec_out_kpts_score,
-         enc_topk_bboxes, enc_topk_rads, enc_topk_kpts, enc_topk_logits, enc_topk_kpts_score,
+        (dec_out_bboxes, dec_out_rads, dec_out_kpts, dec_out_logits,
+         enc_topk_bboxes, enc_topk_rads, enc_topk_kpts, enc_topk_logits,
          dn_meta) = out_transformer
         if self.training:
             assert inputs is not None
@@ -772,10 +772,8 @@ class DINOHEAD_oad_kpts(nn.Layer):
                         dec_out_kpts, dn_meta['dn_num_split'], axis=2)
                     dn_out_logits, dec_out_logits = paddle.split(
                         dec_out_logits, dn_meta['dn_num_split'], axis=2)
-                    dn_out_kpts_score, dec_out_kpts_score = paddle.split(
-                        dec_out_kpts_score, dn_meta['dn_num_split'], axis=2)
             else:
-                dn_out_bboxes, dn_out_rads, dn_out_kpts, dn_out_logits, dn_out_kpts_score = None, None, None, None, None
+                dn_out_bboxes, dn_out_rads, dn_out_kpts, dn_out_logits = None, None, None, None
 
             out_bboxes = paddle.concat(
                 [enc_topk_bboxes.unsqueeze(0), dec_out_bboxes])
@@ -785,15 +783,12 @@ class DINOHEAD_oad_kpts(nn.Layer):
                 [enc_topk_kpts.unsqueeze(0), dec_out_kpts])
             out_logits = paddle.concat(
                 [enc_topk_logits.unsqueeze(0), dec_out_logits])
-            out_kpts_score = paddle.concat(
-                [enc_topk_kpts_score.unsqueeze(0), dec_out_kpts_score])
 
             return self.loss(
                 out_bboxes,
                 out_rads,
                 out_kpts,
                 out_logits,
-                out_kpts_score,
                 inputs['gt_bbox'],
                 inputs['gt_rad'],
                 inputs['gt_keypoint'],
@@ -802,7 +797,6 @@ class DINOHEAD_oad_kpts(nn.Layer):
                 dn_out_rads=dn_out_rads,
                 dn_out_kpts=dn_out_kpts,
                 dn_out_logits=dn_out_logits,
-                dn_out_kpts_score=dn_out_kpts_score,
                 dn_meta=dn_meta)
         else:
-            return (dec_out_bboxes[-1], dec_out_logits[-1], dec_out_rads[-1], dec_out_kpts[-1], dec_out_kpts_score[-1], None)
+            return (dec_out_bboxes[-1], dec_out_logits[-1], dec_out_rads[-1], dec_out_kpts[-1], None)

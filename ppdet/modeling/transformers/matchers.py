@@ -25,12 +25,13 @@ import paddle.nn.functional as F
 from scipy.optimize import linear_sum_assignment
 
 from ppdet.core.workspace import register, serializable
-from ..losses.iou_loss import GIoULoss
+from ..losses.iou_loss import GIoULoss, GDLoss_v1
 from ..losses.smooth_l1_loss import SmoothL1Loss
 from ..losses.keypoint_loss import *
 from .utils import bbox_cxcywh_to_xyxy
+from ext_op import rbox_iou
 
-__all__ = ['HungarianMatcher', 'HungarianMatcher_oad', 'HungarianMatcher_oad_kpts']
+__all__ = ['HungarianMatcher', 'HungarianMatcher_oad', 'HungarianMatcher_oadkpt']
 
 
 @register
@@ -217,6 +218,7 @@ class HungarianMatcher_oad(nn.Layer):
         self.gamma = gamma
 
         self.giou_loss = GIoULoss()
+        self.gwd_loss = GDLoss_v1()
         self.L1radian = SmoothL1Loss()
 
     def forward(self,
@@ -283,12 +285,16 @@ class HungarianMatcher_oad(nn.Layer):
             out_bbox.unsqueeze(1) - tgt_bbox.unsqueeze(0)).abs().sum(-1)
 
         # Compute the giou cost betwen boxes
+        # FIXME: Detete after test
         cost_giou = self.giou_loss(
             bbox_cxcywh_to_xyxy(out_bbox.unsqueeze(1)),
             bbox_cxcywh_to_xyxy(tgt_bbox.unsqueeze(0))).squeeze(-1)
+        ######### ANCHOR: use rbboxes to calculate riou cost
+        ###out_rbbox = paddle.concat([out_bbox, out_rad],axis=-1)
+        ###tgt_rbbox = paddle.concat([tgt_bbox, tgt_rad],axis=-1)
+        ###cost_giou = self.gwd_loss(out_rbbox.unsqueeze(1), tgt_rbbox.unsqueeze(0)).squeeze(-1)
         
         # radian loss
-        ##p_radian = paddle.tanh(out_radian.unsqueeze(1)) * 0.78539
         p_radian = out_rad.unsqueeze(1)
         t_radian = tgt_rad.unsqueeze(0)
         cost_radian = self.L1radian(paddle.cos(p_radian), paddle.cos(t_radian)) + self.L1radian(paddle.sin(p_radian), paddle.sin(t_radian))
@@ -353,7 +359,7 @@ class HungarianMatcher_oad(nn.Layer):
         
 @register
 @serializable
-class HungarianMatcher_oad_kpts(nn.Layer):
+class HungarianMatcher_oadkpt(nn.Layer):
     __shared__ = ['use_focal_loss', 'with_mask', 'num_sample_points']
 
     def __init__(self,
@@ -375,7 +381,7 @@ class HungarianMatcher_oad_kpts(nn.Layer):
         Args:
             matcher_coeff (dict): The coefficient of hungarian matcher cost.
         """
-        super(HungarianMatcher_oad_kpts, self).__init__()
+        super(HungarianMatcher_oadkpt, self).__init__()
         self.matcher_coeff = matcher_coeff
         self.use_focal_loss = use_focal_loss
         self.with_mask = with_mask
@@ -460,7 +466,7 @@ class HungarianMatcher_oad_kpts(nn.Layer):
             bbox_cxcywh_to_xyxy(tgt_bbox.unsqueeze(0))).squeeze(-1)
         
         # radian loss
-        p_radian = paddle.tanh(out_rad.unsqueeze(1)) * 0.78539
+        p_radian = out_rad.unsqueeze(1)
         t_radian = tgt_rad.unsqueeze(0)
         cost_radian = self.L1radian(paddle.cos(p_radian), paddle.cos(t_radian)) + self.L1radian(paddle.sin(p_radian), paddle.sin(t_radian))
         

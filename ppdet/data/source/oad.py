@@ -109,6 +109,7 @@ class OADDataSet(DetDataset):
         self.cname2cid=combined_dict
         self.catid2clsid=dict({catid: i for i, catid in enumerate(combined_dict.values())})
         self.pose_num=len(pose_list_new)
+        self.kpts_num=coco.dataset['annotations'][0]['num_keypoints']
         if 'annotations' not in coco.dataset:
             self.load_image_only = True
             logger.warning('Annotation file: {} does not contains ground truth '
@@ -182,10 +183,7 @@ class OADDataSet(DetDataset):
 
                 gt_bbox = np.zeros((num_bbox, 4), dtype=np.float32)
                 gt_rad = np.zeros((num_bbox, 1), dtype=np.float32)
-                # FIXME : 나중에 꼭 고쳐야함 -> keypoint 갯수에 맞게
-                gt_keypoint = np.zeros((num_bbox, 6), dtype=np.float32)
-                # gt_keypoint_mask = np.zeros((num_bbox, 3), dtype=np.float32)
-                # gt_keypoint = np.zeros((num_bbox, len(rbboxes[0]['keypoints'])), dtype=np.float32)
+                gt_keypoint = np.zeros((num_bbox, self.kpts_num*2), dtype=np.float32)
                 gt_class = np.zeros((num_bbox, 1), dtype=np.int32)
                 gt_pose = np.zeros((num_bbox, 1), dtype=np.int32)
                 is_crowd = np.zeros((num_bbox, 1), dtype=np.int32)
@@ -208,7 +206,6 @@ class OADDataSet(DetDataset):
                     rbox['rbbox'][3] += rbox['rbbox'][1]
                     gt_bbox[i, :] = rbox['rbbox'][:4]
                     gt_rad[i, :] = rbox['rbbox'][4]
-                    # gt_keypoint[i, :] = rbox['keypoints']
                     gt_keypoint[i, :] = [rbox['keypoints'][j] for j in range(len(rbox['keypoints'])) if (j+1) % 3 != 0]
                     is_crowd[i][0] = rbox['iscrowd']
                     # check RLE format 

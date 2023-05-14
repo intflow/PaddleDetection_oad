@@ -117,7 +117,7 @@ class COCOMetric(Metric):
         for cls_id in np.unique(outs['bbox'][:,0]):
             if cls_id not in self.clsid2catid.keys():
                 self.clsid2catid[cls_id] = 0
-
+        # TODO: Radian 있으면 rbbox 고려하여 segm으로 측정하는게 좋음
         infer_results = get_infer_results(
             outs, self.clsid2catid, bias=self.bias, add_rad=self.add_rad, add_kpts=self.add_kpts)
         self.results['bbox'] += infer_results[

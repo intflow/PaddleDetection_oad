@@ -26,7 +26,7 @@ except Exception:
 
 __all__ = [
     'BBoxPostProcess', 'MaskPostProcess', 'JDEBBoxPostProcess',
-    'CenterNetPostProcess', 'DETRPostProcess', 'SparsePostProcess', 'DETRPostProcess_oad', 'DETRPostProcess_oad_kpts'
+    'CenterNetPostProcess', 'DETRPostProcess', 'SparsePostProcess', 'DETRPostProcess_oad', 'DETRPostProcess_oadkpt'
 ]
 
 
@@ -878,7 +878,7 @@ class DETRPostProcess_oad(object):
     
 
 @register
-class DETRPostProcess_oad_kpts(object):
+class DETRPostProcess_oadkpt(object):
     __shared__ = ['num_classes', 'use_focal_loss', 'with_mask']
     __inject__ = []
 
@@ -892,7 +892,7 @@ class DETRPostProcess_oad_kpts(object):
                  mask_threshold=0.5,
                  use_avg_mask_score=False,
                  bbox_decode_type='origin'):
-        super(DETRPostProcess_oad_kpts, self).__init__()
+        super(DETRPostProcess_oadkpt, self).__init__()
         assert bbox_decode_type in ['origin', 'pad']
 
         self.num_classes = num_classes
@@ -931,14 +931,13 @@ class DETRPostProcess_oad_kpts(object):
             bbox_num (Tensor): The number of prediction boxes of each batch with
                 shape [bs], and is N.
         """
-        bboxes, logits, rad, kpts, kpts_score, masks = head_out
+        bboxes, logits, rad, kpts, masks = head_out
         if self.dual_queries:
             num_queries = logits.shape[1]
-            logits, bboxes, rad, kpts, kpts_score = logits[:, :int(num_queries // (self.dual_groups + 1)), :], \
+            logits, bboxes, rad, kpts = logits[:, :int(num_queries // (self.dual_groups + 1)), :], \
                                   bboxes[:, :int(num_queries // (self.dual_groups + 1)), :], \
                                   rad[:, :int(num_queries // (self.dual_groups + 1)), :], \
-                                  kpts[:, :int(num_queries // (self.dual_groups + 1)), :]. \
-                                  kpts_score[:, :int(num_queries // (self.dual_groups + 1)), :]
+                                  kpts[:, :int(num_queries // (self.dual_groups + 1)), :]
 
         bbox_pred = bbox_cxcywh_to_xyxy(bboxes)
         # calculate the original shape of the image
@@ -959,9 +958,6 @@ class DETRPostProcess_oad_kpts(object):
         kpts *= out_kpts_shape
 
         scores = F.sigmoid(logits) if self.use_focal_loss else F.softmax(
-            logits)[:, :, :-1]
-
-        kpts_score = F.sigmoid(kpts_score) if self.use_focal_loss else F.softmax(
             logits)[:, :, :-1]
 
         if not self.use_focal_loss:
@@ -986,7 +982,6 @@ class DETRPostProcess_oad_kpts(object):
             bbox_pred = paddle.gather_nd(bbox_pred, index)
             rad = paddle.gather_nd(rad, index)
             kpts = paddle.gather_nd(kpts, index)
-            kpts_score = paddle.gather_nd(kpts_score, index)
 
         mask_pred = None
         if self.with_mask:
@@ -1015,10 +1010,9 @@ class DETRPostProcess_oad_kpts(object):
             axis=-1)
 
         kpts_split = kpts.reshape([kpts.shape[0], kpts.shape[1], -1, 2])
-        kpts_score_split = kpts_score.reshape([kpts_score.shape[0], kpts_score.shape[1], -1, 1])
         kpts_pred = paddle.concat(
                 [
-                    kpts_split, kpts_score_split
+                    kpts_split
                 ],
                 axis=-1
             ).reshape([kpts.shape[0], kpts.shape[1], -1])

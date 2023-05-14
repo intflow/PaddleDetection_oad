@@ -20,7 +20,7 @@ import paddle
 from .meta_arch import BaseArch
 from ppdet.core.workspace import register, create
 
-__all__ = ['DETR', 'DETR_oad', 'DETR_oad_kpts']
+__all__ = ['DETR', 'DETR_oad', 'DETR_oadkpt']
 # Deformable DETR, DINO use the same architecture as DETR
 
 
@@ -207,7 +207,7 @@ class DETR_oad(BaseArch):
         return self._forward()
 
 @register
-class DETR_oad_kpts(BaseArch):
+class DETR_oadkpt(BaseArch):
     __category__ = 'architecture'
     __inject__ = ['post_process']
     __shared__ = ['with_mask', 'exclude_post_process']
@@ -220,7 +220,7 @@ class DETR_oad_kpts(BaseArch):
                  post_process='DETRPostProcess',
                  with_mask=False,
                  exclude_post_process=False):
-        super(DETR_oad_kpts, self).__init__()
+        super(DETR_oadkpt, self).__init__()
         self.backbone = backbone
         self.transformer = transformer
         self.detr_head = detr_head

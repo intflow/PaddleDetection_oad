@@ -20,11 +20,12 @@ import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 from ppdet.core.workspace import register
-from .iou_loss import GIoULoss
+from .iou_loss import GIoULoss, GDLoss_v1
 from ..transformers import bbox_cxcywh_to_xyxy, sigmoid_focal_loss, varifocal_loss_with_logits
 from ..bbox_utils import bbox_iou
+from ext_op import rbox_iou, matched_rbox_iou
 
-__all__ = ['DETRLoss', 'DINOLoss', 'DETRLoss_oad', 'DINOLoss_oad', 'DINOLoss_oad_kpts']
+__all__ = ['DETRLoss', 'DINOLoss', 'DETRLoss_oad', 'DINOLoss_oad', 'DINOLoss_oadkpt']
 
 
 @register
@@ -625,6 +626,7 @@ class DETRLoss_oad(nn.Layer):
                                                    loss_coeff['class'])
             self.loss_coeff['class'][-1] = loss_coeff['no_object']
         self.giou_loss = GIoULoss()
+        self.gwd_loss = GDLoss_v1()
 
     def _get_loss_class(self,
                         logits,
@@ -689,6 +691,34 @@ class DETRLoss_oad(nn.Layer):
         loss[name_giou] = self.loss_coeff['giou'] * loss[name_giou]
         return loss
 
+    # ANCHOR: Don't use for now, performance drop detected
+    def _get_loss_rbbox(self, boxes, gt_bbox, rads, gt_rad, match_indices, num_gts,
+                       postfix=""):
+        # boxes: [b, query, 4], gt_bbox: list[[n, 4]]
+        name_bbox = "loss_bbox" + postfix
+        name_giou = "loss_giou" + postfix
+
+        loss = dict()
+        if sum(len(a) for a in gt_bbox) == 0:
+            loss[name_bbox] = paddle.to_tensor([0.])
+            loss[name_giou] = paddle.to_tensor([0.])
+            return loss 
+
+        src_bbox, target_bbox = self._get_src_target_assign(boxes, gt_bbox,
+                                                            match_indices)
+        loss[name_bbox] = self.loss_coeff['bbox'] * F.l1_loss(
+            src_bbox, target_bbox, reduction='sum') / num_gts
+        # ANCHOR: Replace giou loss with GWD loss for rbboxes
+        src_rad, target_rad = self._get_src_target_assign(rads, gt_rad,
+                                                            match_indices)
+        src_rbbox = paddle.concat([src_bbox, src_rad],axis=-1)
+        target_rbbox = paddle.concat([target_bbox, target_rad],axis=-1)
+        loss[name_giou] = self.gwd_loss(src_rbbox, target_rbbox)
+
+        loss[name_giou] = loss[name_giou].sum() / num_gts
+        loss[name_giou] = self.loss_coeff['giou'] * loss[name_giou]
+        return loss
+
     def _get_loss_rad(self, rads, gt_rad, match_indices, num_gts,
                        postfix=""):
         # rads: [b, query, 1], gt_rad: list[[n, 1]]
@@ -701,7 +731,6 @@ class DETRLoss_oad(nn.Layer):
 
         src_rad, target_rad = self._get_src_target_assign(rads, gt_rad,
                                                             match_indices)
-        ##src_rad = paddle.tanh(src_rad) * 0.78539
         loss[name_rad] = self.loss_coeff['rad'] * \
         (F.smooth_l1_loss(paddle.cos(src_rad), paddle.cos(target_rad), reduction='sum') +
          F.smooth_l1_loss(paddle.sin(src_rad), paddle.sin(target_rad), reduction='sum')) / num_gts
@@ -788,10 +817,19 @@ class DETRLoss_oad(nn.Layer):
                 if sum(len(a) for a in gt_bbox) > 0:
                     src_bbox, target_bbox = self._get_src_target_assign(
                         aux_boxes.detach(), gt_bbox, match_indices)
-                    # FIXME: Consider using GWD instead of bbox iou to use radian
                     iou_score = bbox_iou(
                         bbox_cxcywh_to_xyxy(src_bbox).split(4, -1),
                         bbox_cxcywh_to_xyxy(target_bbox).split(4, -1))
+                
+                    ### ANCHOR: use rbox_iou in ext_op to precisly calculate iou between two rbboxes
+                    ##src_rad, target_rad = self._get_src_target_assign(
+                    ##    aux_rads.detach(), gt_rad, match_indices)
+                    ##src_rbbox = paddle.concat([src_bbox,src_rad],axis=-1) #cx,cy,w,h,rad
+                    ##target_rbbox = paddle.concat([target_bbox,target_rad],axis=-1)
+                    ##pd_gt_rbox = paddle.to_tensor(src_rbbox, dtype='float32')
+                    ##pd_pred_rbox = paddle.to_tensor(target_rbbox, dtype='float32')
+                    ##riou_score = matched_rbox_iou(pd_gt_rbox, pd_pred_rbox)
+                    ##iou_score = riou_score.unsqueeze(-1)
                 else:
                     iou_score = None
             else:
@@ -802,6 +840,9 @@ class DETRLoss_oad(nn.Layer):
                                          'loss_class' + postfix])
             loss_ = self._get_loss_bbox(aux_boxes, gt_bbox, match_indices,
                                         num_gts, postfix)
+            ### ANCHOR: rbbox loss, performance bad
+            ##loss_ = self._get_loss_rbbox(aux_boxes, gt_bbox, aux_rads, gt_rad, match_indices,
+            ##                            num_gts, postfix)
             loss_bbox.append(loss_['loss_bbox' + postfix])
             loss_giou.append(loss_['loss_giou' + postfix])
             loss_rad.append(
@@ -878,13 +919,20 @@ class DETRLoss_oad(nn.Layer):
 
         if self.use_vfl:
             if sum(len(a) for a in gt_bbox) > 0:
-                # rbbox의 iou를 구하고 싶다면 아래코드부터 진행해야함
                 src_bbox, target_bbox = self._get_src_target_assign(
                     boxes.detach(), gt_bbox, match_indices)
-                # FIXME: Consider using GWD instead of bbox iou to use radian
                 iou_score = bbox_iou(
                     bbox_cxcywh_to_xyxy(src_bbox).split(4, -1),
                     bbox_cxcywh_to_xyxy(target_bbox).split(4, -1))
+                ### ANCHOR: use rbox_iou in ext_op to precisly calculate iou between two rbboxes
+                ##src_rad, target_rad = self._get_src_target_assign(
+                ##    rads.detach(), gt_rad, match_indices)
+                ##src_rbbox = paddle.concat([src_bbox,src_rad],axis=-1) #cx,cy,w,h,rad
+                ##target_rbbox = paddle.concat([target_bbox,target_rad],axis=-1)
+                ##pd_gt_rbox = paddle.to_tensor(src_rbbox, dtype='float32')
+                ##pd_pred_rbox = paddle.to_tensor(target_rbbox, dtype='float32')
+                ##riou_score = matched_rbox_iou(pd_gt_rbox, pd_pred_rbox)
+                ##iou_score = riou_score.unsqueeze(-1)
             else:
                 iou_score = None
         else:
@@ -894,9 +942,13 @@ class DETRLoss_oad(nn.Layer):
         loss.update(
             self._get_loss_class(logits, gt_class, match_indices,
                                  self.num_classes, num_gts, postfix, iou_score))
+        ###loss.update(
+        ###    self._get_loss_bbox(boxes, gt_bbox, match_indices, num_gts,
+        ###                        postfix))
+        # ANCHOR: rbbox loss, performance bad
         loss.update(
-            self._get_loss_bbox(boxes, gt_bbox, match_indices, num_gts,
-                                postfix))
+            self._get_loss_rbbox(boxes, gt_bbox, rads, gt_rad, 
+                                 match_indices, num_gts, postfix))
         loss.update(
             self._get_loss_rad(rads, gt_rad, match_indices, num_gts,
                                 postfix))
@@ -1033,13 +1085,13 @@ class DINOLoss_oad(DETRLoss_oad):
 # -----------------------------------------------------------------------------------------------
 
 @register
-class DETRLoss_oad_kpts(nn.Layer):
+class DETRLoss_oadkpt(nn.Layer):
     __shared__ = ['num_classes', 'use_focal_loss']
     __inject__ = ['matcher']
 
     def __init__(self,
                  num_classes=80,
-                 matcher='HungarianMatcher_oad_kpts',
+                 matcher='HungarianMatcher_oadkpt',
                  loss_coeff={
                      'class': 1,
                      'bbox': 5,
@@ -1063,7 +1115,7 @@ class DETRLoss_oad_kpts(nn.Layer):
             aux_loss (bool): If 'aux_loss = True', loss at each decoder layer are to be used.
             use_focal_loss (bool): Use focal loss or not.
         """
-        super(DETRLoss_oad_kpts, self).__init__()
+        super(DETRLoss_oadkpt, self).__init__()
 
         self.num_classes = num_classes
         self.matcher = matcher
@@ -1155,7 +1207,6 @@ class DETRLoss_oad_kpts(nn.Layer):
 
         src_rad, target_rad = self._get_src_target_assign(rads, gt_rad,
                                                             match_indices)
-        src_rad = paddle.tanh(src_rad) * 0.78539
         loss[name_rad] = self.loss_coeff['rad'] * \
         (F.smooth_l1_loss(paddle.cos(src_rad), paddle.cos(target_rad), reduction='sum') +
          F.smooth_l1_loss(paddle.sin(src_rad), paddle.sin(target_rad), reduction='sum')) / num_gts
@@ -1166,7 +1217,7 @@ class DETRLoss_oad_kpts(nn.Layer):
         # kpts: [b, query, 1], gt_keypoint: list[[n, 1]]
         name_kpts = "loss_kpts" + postfix
         
-        sigmas = paddle.to_tensor([.5]*kpts.shape[-1])
+        sigmas = paddle.to_tensor([.5]*int(kpts.shape[-1]/2))
 
         loss = dict()
         if sum(len(a) for a in gt_keypoint) == 0:
@@ -1175,13 +1226,15 @@ class DETRLoss_oad_kpts(nn.Layer):
 
         src_kpts, target_kpts = self._get_src_target_assign(kpts, gt_keypoint, match_indices)
         
-        src_bbox, target_bbox = self._get_src_target_assign(boxes, gt_bbox, match_indices)
-        
-        diff = (src_kpts - target_kpts) ** 2
-        s = paddle.prod(target_bbox[:,-2:], axis=1, keepdim=True)
-        
-        # Mask code 
-        loss[name_kpts] = self.loss_coeff['rad'] * (1 - paddle.exp(-diff/(2*(s*sigmas)**2+1e-9))).mean()
+        ##src_bbox, target_bbox = self._get_src_target_assign(boxes, gt_bbox, match_indices)
+        ##
+        ##diff = (src_kpts[:,0::2] - target_kpts[:,0::2]) ** 2 + (src_kpts[:,1::2] - target_kpts[:,1::2]) ** 2
+        ##s = paddle.prod(target_bbox[:,-2:], axis=1, keepdim=True)
+        ##
+        ### OKS Loss 
+        ##loss[name_kpts] = self.loss_coeff['kpts'] * (1 - paddle.exp(-diff/(2*(s*sigmas)**2+1e-9))).mean()
+        # L1 Loss
+        loss[name_kpts] = F.smooth_l1_loss(src_kpts, target_kpts, reduction='sum') / num_gts
         
         # #### example yolov7_oad oks based loss
         # d = (pkpt_x-selected_tkpt[:,0::2])**2 + (pkpt_y-selected_tkpt[:,1::2])**2
@@ -1279,7 +1332,6 @@ class DETRLoss_oad_kpts(nn.Layer):
                 if sum(len(a) for a in gt_bbox) > 0:
                     src_bbox, target_bbox = self._get_src_target_assign(
                         aux_boxes.detach(), gt_bbox, match_indices)
-                    # FIXME: Consider using GWD instead of bbox iou to use radian
                     iou_score = bbox_iou(
                         bbox_cxcywh_to_xyxy(src_bbox).split(4, -1),
                         bbox_cxcywh_to_xyxy(target_bbox).split(4, -1))
@@ -1376,10 +1428,8 @@ class DETRLoss_oad_kpts(nn.Layer):
 
         if self.use_vfl:
             if sum(len(a) for a in gt_bbox) > 0:
-                # rbbox의 iou를 구하고 싶다면 아래코드부터 진행해야함
                 src_bbox, target_bbox = self._get_src_target_assign(
                     boxes.detach(), gt_bbox, match_indices)
-                # FIXME: Consider using GWD instead of bbox iou to use radian
                 iou_score = bbox_iou(
                     bbox_cxcywh_to_xyxy(src_bbox).split(4, -1),
                     bbox_cxcywh_to_xyxy(target_bbox).split(4, -1))
@@ -1412,7 +1462,6 @@ class DETRLoss_oad_kpts(nn.Layer):
                 rads,
                 kpts,
                 logits,
-                kpts_score,
                 gt_bbox,
                 gt_rad,
                 gt_keypoint,
@@ -1473,13 +1522,12 @@ class DETRLoss_oad_kpts(nn.Layer):
         return total_loss
     
 @register
-class DINOLoss_oad_kpts(DETRLoss_oad_kpts):
+class DINOLoss_oadkpt(DETRLoss_oadkpt):
     def forward(self,
                 boxes,
                 rads,
                 kpts,
                 logits,
-                kpts_score,
                 gt_bbox,
                 gt_rad,
                 gt_keypoint,
@@ -1491,12 +1539,11 @@ class DINOLoss_oad_kpts(DETRLoss_oad_kpts):
                 dn_out_rads=None,
                 dn_out_kpts=None,
                 dn_out_logits=None,
-                dn_out_kpts_score=None,
                 dn_meta=None,
                 **kwargs):
         num_gts = self._get_num_gts(gt_class)
-        total_loss = super(DINOLoss_oad_kpts, self).forward(
-            boxes, rads, kpts, logits, kpts_score, gt_bbox, gt_rad, gt_keypoint, gt_class, num_gts=num_gts)
+        total_loss = super(DINOLoss_oadkpt, self).forward(
+            boxes, rads, kpts, logits, gt_bbox, gt_rad, gt_keypoint, gt_class, num_gts=num_gts)
 
         if dn_meta is not None:
             dn_positive_idx, dn_num_group = \
@@ -1509,12 +1556,11 @@ class DINOLoss_oad_kpts(DETRLoss_oad_kpts):
 
             # compute denoising training loss
             num_gts *= dn_num_group
-            dn_loss = super(DINOLoss_oad_kpts, self).forward(
+            dn_loss = super(DINOLoss_oadkpt, self).forward(
                 dn_out_bboxes,
                 dn_out_rads,
                 dn_out_kpts,
                 dn_out_logits,
-                dn_out_kpts_score,
                 gt_bbox,
                 gt_rad,
                 gt_keypoint,
