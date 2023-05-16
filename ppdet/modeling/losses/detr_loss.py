@@ -21,6 +21,7 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 from ppdet.core.workspace import register
 from .iou_loss import GIoULoss, GDLoss_v1
+from ..losses.keypoint_loss import *
 from ..transformers import bbox_cxcywh_to_xyxy, sigmoid_focal_loss, varifocal_loss_with_logits
 from ..bbox_utils import bbox_iou
 from ext_op import rbox_iou, matched_rbox_iou
@@ -1105,7 +1106,8 @@ class DETRLoss_oadkpt(nn.Layer):
                  use_focal_loss=False,
                  use_vfl=False,
                  use_uni_match=False,
-                 uni_match_ind=0):
+                 uni_match_ind=0,
+                 num_kpts=3):
         r"""
         Args:
             num_classes (int): The number of classes.
@@ -1125,12 +1127,15 @@ class DETRLoss_oadkpt(nn.Layer):
         self.use_vfl = use_vfl
         self.use_uni_match = use_uni_match
         self.uni_match_ind = uni_match_ind
+        self.num_kpts = num_kpts
 
         if not self.use_focal_loss:
             self.loss_coeff['class'] = paddle.full([num_classes + 1],
                                                    loss_coeff['class'])
             self.loss_coeff['class'][-1] = loss_coeff['no_object']
         self.giou_loss = GIoULoss()
+        self.oks_loss = OKSLoss_Transformer(num_keypoints=self.num_kpts)
+
 
     def _get_loss_class(self,
                         logits,
@@ -1216,27 +1221,27 @@ class DETRLoss_oadkpt(nn.Layer):
                        postfix=""):
         # kpts: [b, query, 1], gt_keypoint: list[[n, 1]]
         name_kpts = "loss_kpts" + postfix
-        
-        sigmas = paddle.to_tensor([.5]*int(kpts.shape[-1]/2))
-
+    
         loss = dict()
         if sum(len(a) for a in gt_keypoint) == 0:
             loss[name_kpts] = paddle.to_tensor([0.])
             return loss
 
         src_kpts, target_kpts = self._get_src_target_assign(kpts, gt_keypoint, match_indices)
+        _, target_bbox = self._get_src_target_assign(boxes, gt_bbox, match_indices)
+        s = paddle.prod(target_bbox[:,-2:], axis=1, keepdim=True)
         
-        ##src_bbox, target_bbox = self._get_src_target_assign(boxes, gt_bbox, match_indices)
-        ##
-        ##diff = (src_kpts[:,0::2] - target_kpts[:,0::2]) ** 2 + (src_kpts[:,1::2] - target_kpts[:,1::2]) ** 2
-        ##s = paddle.prod(target_bbox[:,-2:], axis=1, keepdim=True)
-        ##
-        ### OKS Loss 
-        ##loss[name_kpts] = self.loss_coeff['kpts'] * (1 - paddle.exp(-diff/(2*(s*sigmas)**2+1e-9))).mean()
+        # OKS Loss 
+        #sigmas = paddle.to_tensor([.5]*int(kpts.shape[-1]/2))
+        #diff = (src_kpts[:,0::2] - target_kpts[:,0::2]) ** 2 + (src_kpts[:,1::2] - target_kpts[:,1::2]) ** 2
+        ##loss[name_kpts] = self.loss_coeff['kpts'] * (1 - paddle.exp(-diff/(2*(s*sigmas)**2+1e-9))).sum() / num_gts
+        ###loss[name_kpts] = self.loss_coeff['kpts'] * self.oks_loss(src_kpts, target_kpts, None, s)
+
         # L1 Loss
-        loss[name_kpts] = F.smooth_l1_loss(src_kpts, target_kpts, reduction='sum') / num_gts
+        # FIXME: OKS debug
+        loss[name_kpts] = self.loss_coeff['kpts'] * F.smooth_l1_loss(src_kpts, target_kpts, reduction='sum') / num_gts
         
-        # #### example yolov7_oad oks based loss
+        # REVIEW :example yolov7_oad oks based loss
         # d = (pkpt_x-selected_tkpt[:,0::2])**2 + (pkpt_y-selected_tkpt[:,1::2])**2
         # s = torch.prod(selected_tbox[:,-2:], dim=1, keepdim=True)
         # kpt_loss_factor = (torch.sum(kpt_mask != 0) + torch.sum(kpt_mask == 0))/(torch.sum(kpt_mask != 0) + 1e-9)

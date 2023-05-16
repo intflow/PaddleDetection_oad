@@ -17,6 +17,9 @@ add_kpts: True
 TrainReader:
   batch_size: 8
 
+EvalReader:
+  batch_size: 8
+
 DETR_oadkpt:
   backbone: ResNet
   neck: HybridEncoder
@@ -38,7 +41,6 @@ RTDETRTransformer_oadkpt:
   label_noise_ratio: 0.5
   box_noise_scale: 1.0
   learnt_init_query: False
-  kpts_num: 3
 
 DINOHEAD_oadkpt:
   loss:

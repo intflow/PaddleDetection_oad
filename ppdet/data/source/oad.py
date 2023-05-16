@@ -109,7 +109,7 @@ class OADDataSet(DetDataset):
         self.cname2cid=combined_dict
         self.catid2clsid=dict({catid: i for i, catid in enumerate(combined_dict.values())})
         self.pose_num=len(pose_list_new)
-        self.kpts_num=coco.dataset['annotations'][0]['num_keypoints']
+        self.num_kpts=coco.dataset['annotations'][0]['num_keypoints']
         if 'annotations' not in coco.dataset:
             self.load_image_only = True
             logger.warning('Annotation file: {} does not contains ground truth '
@@ -183,7 +183,7 @@ class OADDataSet(DetDataset):
 
                 gt_bbox = np.zeros((num_bbox, 4), dtype=np.float32)
                 gt_rad = np.zeros((num_bbox, 1), dtype=np.float32)
-                gt_keypoint = np.zeros((num_bbox, self.kpts_num*2), dtype=np.float32)
+                gt_keypoint = np.zeros((num_bbox, self.num_kpts*2), dtype=np.float32)
                 gt_class = np.zeros((num_bbox, 1), dtype=np.int32)
                 gt_pose = np.zeros((num_bbox, 1), dtype=np.int32)
                 is_crowd = np.zeros((num_bbox, 1), dtype=np.int32)

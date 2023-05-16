@@ -641,26 +641,18 @@ def oks_overlaps_transformer(kpt_preds, kpt_gts, kpt_valids, kpt_areas, sigmas):
     
     sigmas = paddle.to_tensor(sigmas, dtype=kpt_preds.dtype)
     variances = (sigmas * 2)**2
+
+    kpt_preds = kpt_preds.reshape((-1, 1, kpt_preds.shape[-1] // 2, 2))
+    kpt_gts = kpt_gts.reshape((1, -1, kpt_gts.shape[-1] // 2, 2))
     
-    diff = paddle.abs(kpt_preds - kpt_gts)
-    # reshape_diff = diff.reshape((kpt_preds.shape[0], kpt_gts.shape[1], kpt_preds.shape[-1] // 2, 2))
-    squared_distance = diff ** 2
-    # Area로 나눠주는 코드 구현
-    squared_distance0 = (squared_distance / (variances[None, :] * 2))
+
+    squared_distance = (kpt_preds[:, :, :, 0] - kpt_gts[:, :, :, 0]) ** 2 + \
+         (kpt_preds[:, :, :, 1] - kpt_gts[:, :, :, 1]) ** 2
+        
+    squared_distance0 = squared_distance / (variances[None, None, :] * 2)
+
     squared_distance1 = paddle.exp(-squared_distance0)
     oks = squared_distance1.sum(axis=2)
-
-    # kpt_preds = kpt_preds.reshape((-1, kpt_preds.shape[-1] // 2, 2))
-    # kpt_gts = kpt_gts.reshape((-1, kpt_gts.shape[-1] // 2, 2))
-
-    # squared_distance = (kpt_preds[:, :, 0] - kpt_gts[:, :, 0]) ** 2 + \
-    #     (kpt_preds[:, :, 1] - kpt_gts[:, :, 1]) ** 2
-        
-    # squared_distance0 = squared_distance / (
-    #     kpt_areas[:, None] * variances[None, :] * 2)
-    # squared_distance1 = paddle.exp(-squared_distance0)
-    # # squared_distance1 = squared_distance1 * kpt_valids
-    # oks = squared_distance1.sum(axis=1) / kpt_valids.sum(axis=1)
 
     return oks
 
@@ -771,6 +763,10 @@ class OKSLoss_Transformer(nn.Layer):
         elif num_keypoints == 6:
             self.sigmas = np.array([
                 .79, .79, .72, .72, .62, .62
+            ]) / 10.0
+        elif num_keypoints == 3:
+            self.sigmas = np.array([
+                .6, .6, .6
             ]) / 10.0
         else:
             raise ValueError(f'Unsupported keypoints number {num_keypoints}')

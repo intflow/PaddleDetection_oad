@@ -214,7 +214,7 @@ def get_denoising_training_group(targets,
 
     return input_query_class, input_query_bbox, attn_mask, dn_meta
 
-
+# FIXME: Need to debug kpts
 def get_contrastive_denoising_training_group(targets,
                                              num_classes,
                                              num_queries,
@@ -250,7 +250,7 @@ def get_contrastive_denoising_training_group(targets,
     input_query_bbox = paddle.zeros([bs, max_gt_num, 4])
     if active_radian:
         input_query_rad = paddle.zeros([bs, max_gt_num, 1])
-    if active_kpts:
+    if active_kpts > 0:
         input_query_kpts = paddle.zeros([bs, max_gt_num, active_kpts*2])
     pad_gt_mask = paddle.zeros([bs, max_gt_num])
     for i in range(bs):

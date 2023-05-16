@@ -45,12 +45,8 @@ def get_infer_results(outs, catid, bias=0, add_rad=False, add_kpts=False):
 
     infer_res = {}
     if 'bbox' in outs:
-        if len(outs['bbox']) > 0 and len(outs['bbox'][0]) > 6 and add_rad != True:
-            infer_res['bbox'] = get_det_poly_res(
-                outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias)
-        else:
-            infer_res['bbox'] = get_det_res(
-                outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias, add_rad=add_rad)
+        infer_res['bbox'] = get_det_res(
+            outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias, add_rad=add_rad)
 
     if 'mask' in outs:
         # mask post process
@@ -61,9 +57,9 @@ def get_infer_results(outs, catid, bias=0, add_rad=False, add_kpts=False):
         infer_res['segm'] = get_solov2_segm_res(outs, im_id, catid)
 
     if 'keypoint' in outs:
-        if add_kpts:
-            infer_res['keypoint'] = get_keypoint_res_oadkpt(outs, im_id)
-            outs['bbox_num'] = [len(infer_res['keypoint'])]
+        if add_kpts == True:
+            infer_res['keypoint'] = get_keypoint_res_oadkpt(
+                outs['keypoint'], outs['bbox'], outs['bbox_num'], im_id, catid, bias=bias, add_rad=add_rad)
         else:
             infer_res['keypoint'] = get_keypoint_res(outs, im_id)
             outs['bbox_num'] = [len(infer_res['keypoint'])]
@@ -118,26 +114,25 @@ def cocoapi_eval(jsonfile,
     elif style == 'keypoints_crowd':
         coco_eval = COCOeval(coco_gt, coco_dt, style, sigmas, use_area)
     else: # bbox, keypoint
-        # if문
-        if add_rad: # add_rad일 경우에는 rbbox의 bbox(gt)와 dt(bbox)를 매칭시켜줘야 한다.
+        if add_kpts:
+            sigmas = np.array([.5]*(len(coco_gt.dataset['annotations'][0]['keypoints']) // 3))
+            coco_eval = COCOeval(coco_gt, coco_dt, style)
+            coco_eval.params.kpt_oks_sigmas = sigmas
+
+        elif add_rad == True: 
+            for tmp_idx, _ in enumerate(coco_gt.dataset['annotations']):
+                coco_gt.dataset['annotations'][tmp_idx]['segmentation'] = coco_gt.dataset['annotations'][tmp_idx]['segmentation_rbbox']
+            for tmp_idx, _ in enumerate(coco_dt.dataset['annotations']):
+                coco_dt.dataset['annotations'][tmp_idx]['segmentation'] = coco_dt.dataset['annotations'][tmp_idx]['segmentation_rbbox']
+            coco_eval = COCOeval(coco_gt, coco_dt, 'segm')
+        else:
             for tmp_idx, _ in enumerate(coco_gt.dataset['annotations']):
                 cx, cy, witdh, height = coco_gt.dataset['annotations'][tmp_idx]['rbbox'][:4]
                 xmin, ymin = cx - witdh / 2, cy - height / 2 
                 coco_gt.dataset['annotations'][tmp_idx]['bbox'] = [xmin, ymin, witdh, height]
             
-            coco_eval = COCOeval(coco_gt, coco_dt, style)
-        
-        if add_kpts:
-            # FIXME : 여기서 coco_gt의 클래스를 맞춰주면 되지 않을까?
-            # keypoint에서 추정하는 박스는 일반 bbox
-            # for tmp_idx, _ in enumerate(coco_gt.dataset['annotations']):
-            #     cx, cy, witdh, height = coco_gt.dataset['annotations'][tmp_idx]['rbbox'][:4]
-            #     xmin, ymin = cx - witdh / 2, cy - height / 2 
-            #     coco_gt.dataset['annotations'][tmp_idx]['bbox'] = [xmin, ymin, witdh, height]
-                
-            sigmas = np.array([.5]*(len(coco_gt.dataset['annotations'][0]['keypoints']) // 3))
-            coco_eval = COCOeval(coco_gt, coco_dt, style)
-            coco_eval.params.kpt_oks_sigmas = sigmas
+            coco_eval = COCOeval(coco_gt, coco_dt, 'bbox')
+            
     coco_eval.evaluate()
     coco_eval.accumulate()
     coco_eval.summarize()

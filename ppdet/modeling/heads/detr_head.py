@@ -671,7 +671,6 @@ class DINOHEAD_oadkpt(nn.Layer):
 
             if dn_meta is not None:
                 if isinstance(dn_meta, list):
-                    # 이쪽으로는 안오는 듯 (fix 안함)
                     dual_groups = len(dn_meta) - 1
                     dec_out_bboxes = paddle.split(
                         dec_out_bboxes, dual_groups + 1, axis=2)

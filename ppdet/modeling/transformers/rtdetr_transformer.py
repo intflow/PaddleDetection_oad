@@ -969,9 +969,7 @@ class TransformerDecoder_oadkpt(nn.Layer):
                            memory_spatial_shapes, memory_level_start_index,
                            attn_mask, memory_mask, query_pos_embed)
 
-            inter_ref_bbox = F.sigmoid(bbox_head[i](output) + inverse_sigmoid(
-                ref_points_detach))
-            
+            inter_ref_bbox = F.sigmoid(bbox_head[i](output) + inverse_sigmoid(ref_points_detach))
             inter_ref_rad = F.tanh(rad_head[i](output) + ref_rad_detach) * 0.78539
             inter_ref_kpts = F.sigmoid(kpts_head[i](output) + inverse_sigmoid(ref_kpts_detach))
 
@@ -1040,7 +1038,7 @@ class RTDETRTransformer_oadkpt(nn.Layer):
                  eval_size=None,
                  eval_idx=-1,
                  eps=1e-2,
-                 kpts_num=3):
+                 num_kpts=3):
         super(RTDETRTransformer_oadkpt, self).__init__()
         assert position_embed_type in ['sine', 'learned'], \
             f'ValueError: position_embed_type not supported {position_embed_type}!'
@@ -1058,7 +1056,7 @@ class RTDETRTransformer_oadkpt(nn.Layer):
         self.eps = eps
         self.num_decoder_layers = num_decoder_layers
         self.eval_size = eval_size
-        self.kpts_num = kpts_num
+        self.num_kpts = num_kpts
 
         # backbone feature projection
         self._build_input_proj_layer(backbone_feat_channels)
@@ -1095,8 +1093,8 @@ class RTDETRTransformer_oadkpt(nn.Layer):
         self.enc_score_head = nn.Linear(hidden_dim, num_classes)
         self.enc_bbox_head = MLP(hidden_dim, hidden_dim, 4, num_layers=3)
         self.enc_rad_head = MLP(hidden_dim, hidden_dim, 1, num_layers=3)
-        self.enc_kpts_head = MLP(hidden_dim, hidden_dim, kpts_num*2, num_layers=3)
-        ##self.enc_kpts_score_head = nn.Linear(hidden_dim, kpts_num)
+        self.enc_kpts_head = MLP(hidden_dim, hidden_dim, num_kpts*2, num_layers=3)
+        ##self.enc_kpts_score_head = nn.Linear(hidden_dim, num_kpts)
 
         # decoder head
         self.dec_score_head = nn.LayerList([
@@ -1112,11 +1110,11 @@ class RTDETRTransformer_oadkpt(nn.Layer):
             for _ in range(num_decoder_layers)
         ])
         self.dec_kpts_head = nn.LayerList([
-            MLP(hidden_dim, hidden_dim, kpts_num*2, num_layers=3)
+            MLP(hidden_dim, hidden_dim, num_kpts*2, num_layers=3)
             for _ in range(num_decoder_layers)
         ])
         ##self.dec_kpts_score_head = nn.LayerList([
-        ##    nn.Linear(hidden_dim, kpts_num)
+        ##    nn.Linear(hidden_dim, num_kpts)
         ##    for _ in range(num_decoder_layers)
         ##])
 
@@ -1234,7 +1232,7 @@ class RTDETRTransformer_oadkpt(nn.Layer):
                                             self.label_noise_ratio,
                                             self.box_noise_scale,
                                             active_radian=True,
-                                            active_kpts=self.kpts_num)
+                                            active_kpts=self.num_kpts)
         else:
             denoising_class, denoising_bbox_unact, denoising_rad, denoising_kpts, attn_mask, dn_meta = None, None, None, None, None, None
 
@@ -1307,7 +1305,8 @@ class RTDETRTransformer_oadkpt(nn.Layer):
             anchors, valid_mask = self._generate_anchors(spatial_shapes)
         else:
             anchors, valid_mask = self.anchors, self.valid_mask
-        anchors_kpts = paddle.tile(anchors[:,:,:2],[1,1,3])
+        # FIXME: Need to debug anchor part!
+        anchors_kpts = paddle.tile(anchors[:,:,:2],[1,1,self.num_kpts]) #anchor : x,y,w,h
         memory = paddle.where(valid_mask, memory, paddle.to_tensor(0.))
         output_memory = self.enc_output(memory)
 

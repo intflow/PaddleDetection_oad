@@ -971,6 +971,8 @@ class DETRPostProcess_oadkpt(object):
                 index = paddle.stack([batch_ind, index], axis=-1)
                 labels = paddle.gather_nd(labels, index)
                 bbox_pred = paddle.gather_nd(bbox_pred, index)
+                rad = paddle.gather_nd(rad, index)
+                kpts = paddle.gather_nd(kpts, index)
         else:
             scores, index = paddle.topk(
                 scores.flatten(1), self.num_top_queries, axis=-1)
@@ -1019,7 +1021,7 @@ class DETRPostProcess_oadkpt(object):
         
         bbox_num = paddle.to_tensor(
             self.num_top_queries, dtype='int32').tile([bbox_pred.shape[0]])
-        bbox_pred = bbox_pred.reshape([-1, 7]) # bbox(4) + label(1) + score(1) + rad(1)
+        bbox_pred = bbox_pred.reshape([-1, 7]) # label(1) + score(1) + bbox(4) + rad(1)
         # bbox_pred = bbox_pred.reshape([-1, 6])
         # kpts = kpts.reshape([-1, kpts.shape[-1]])
         kpts_pred = kpts_pred.reshape([bbox_pred.shape[0],-1])

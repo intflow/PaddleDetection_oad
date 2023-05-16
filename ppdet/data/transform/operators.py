@@ -1045,6 +1045,10 @@ class Resize(BaseOperator):
                                                     [im_scale_x, im_scale_y],
                                                     [resize_w, resize_h])
 
+        if 'gt_keypoint' in sample:
+            sample['gt_keypoint'] = self.apply_joints(sample['gt_keypoint'],
+                                                    [im_scale_x, im_scale_y],
+                                                    [resize_w, resize_h])
         return sample
 
 
@@ -1723,6 +1727,8 @@ class RandomCrop(BaseOperator):
                     sample['gt_rad'] = np.take(
                         sample['gt_rad'], valid_ids, axis=0)
                 if 'gt_keypoint' in sample:
+                    sample['gt_keypoint'] = self._crop_joints(sample['gt_keypoint'],
+                                                            crop_box)
                     sample['gt_keypoint'] = np.take(
                         sample['gt_keypoint'], valid_ids, axis=0)
 

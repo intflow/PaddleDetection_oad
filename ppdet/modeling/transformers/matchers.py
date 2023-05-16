@@ -376,7 +376,8 @@ class HungarianMatcher_oadkpt(nn.Layer):
                  with_mask=False,
                  num_sample_points=12544,
                  alpha=0.25,
-                 gamma=2.0):
+                 gamma=2.0,
+                 num_kpts=3):
         r"""
         Args:
             matcher_coeff (dict): The coefficient of hungarian matcher cost.
@@ -388,10 +389,11 @@ class HungarianMatcher_oadkpt(nn.Layer):
         self.num_sample_points = num_sample_points
         self.alpha = alpha
         self.gamma = gamma
+        self.num_kpts = num_kpts
 
         self.giou_loss = GIoULoss()
         self.L1radian = SmoothL1Loss()
-        self.oksloss_transformer = OKSLoss_Transformer()
+        self.oks_loss = OKSLoss_Transformer(num_keypoints=self.num_kpts)
 
     def forward(self,
                 boxes,
@@ -432,8 +434,7 @@ class HungarianMatcher_oadkpt(nn.Layer):
         # We flatten to compute the cost matrices in a batch
         # [batch_size * num_queries, num_classes]
         logits = logits.detach()
-        out_prob = F.sigmoid(logits.flatten(
-            0, 1)) if self.use_focal_loss else F.softmax(logits.flatten(0, 1))
+        out_prob = F.sigmoid(logits.flatten(0, 1)) if self.use_focal_loss else F.softmax(logits.flatten(0, 1))
         # [batch_size * num_queries, 4]
         out_bbox = boxes.detach().flatten(0, 1)
         out_rad = rads.detach().flatten(0, 1)
@@ -465,14 +466,16 @@ class HungarianMatcher_oadkpt(nn.Layer):
             bbox_cxcywh_to_xyxy(out_bbox.unsqueeze(1)),
             bbox_cxcywh_to_xyxy(tgt_bbox.unsqueeze(0))).squeeze(-1)
         
-        # radian loss
+        # radian cost
         p_radian = out_rad.unsqueeze(1)
         t_radian = tgt_rad.unsqueeze(0)
         cost_radian = self.L1radian(paddle.cos(p_radian), paddle.cos(t_radian)) + self.L1radian(paddle.sin(p_radian), paddle.sin(t_radian))
         
-        cost_kpts = self.oksloss_transformer(out_kpts.unsqueeze(1), tgt_kpts.unsqueeze(0), None, None)
+        # kpts cost
+        # FIXME: looks kpts bug on matcher OKS
+        ##cost_kpts = self.oks_loss(out_kpts.unsqueeze(1), tgt_kpts.unsqueeze(0), None, None)
+        cost_kpts = self.L1radian(out_kpts.unsqueeze(1), tgt_kpts.unsqueeze(0)).sum(-1)
         
- 
         # Final cost matrix
         C = self.matcher_coeff['class'] * cost_class + \
             self.matcher_coeff['bbox'] * cost_bbox + \

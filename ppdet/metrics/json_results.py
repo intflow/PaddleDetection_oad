@@ -14,6 +14,38 @@
 import six
 import numpy as np
 
+def rotate_boxes(rbboxes):
+    '''
+    Rotate target bounding boxes
+
+    Input:  
+        Target boxes (xmin_ymin, width_height, theta)
+    Output:
+        dets_8pt (xy0, xy1, xy2, xy3)
+    '''
+
+    corners_list = []
+    for rbbox in rbboxes:
+        xmin, ymin, width, height, rad = rbbox
+
+        xy1 = xmin, ymin
+        xy2 = xmin, ymin + height - 1
+        xy3 = xmin + width - 1, ymin + height - 1
+        xy4 = xmin + width - 1, ymin
+
+        cents = np.array([xmin + (width - 1) / 2, ymin + (height - 1) / 2])
+
+        corners = np.stack([xy1, xy2, xy3, xy4])
+
+        u = np.stack([np.cos(rad), -np.sin(rad)])
+        l = np.stack([np.sin(rad), np.cos(rad)])
+        R = np.vstack([u, l])
+
+        corners = np.matmul(R, (corners - cents).transpose(1, 0)).transpose(1, 0) + cents
+
+        corners_list.append(corners)
+    corners_list = np.array(corners_list)
+    return corners_list
 
 def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0, add_rad=False):
     det_res = []
@@ -34,13 +66,16 @@ def get_det_res(bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0, add_ra
             w = xmax - xmin + bias
             h = ymax - ymin + bias
             bbox = [xmin, ymin, w, h]
+            segments_rbbox = rotate_boxes([np.concatenate((bbox, [rad]), axis=-1)])
+            segments_rbbox = [segments_rbbox[0].reshape(-1).tolist()]
             if add_rad:
                 dt_res = {
                     'image_id': cur_image_id,
                     'category_id': category_id,
                     'bbox': bbox,
                     'score': score,
-                    'rad': rad
+                    'rad': rad,
+                    'segmentation_rbbox': segments_rbbox
                 }
             else:
                 dt_res = {
@@ -146,6 +181,47 @@ def get_solov2_segm_res(results, image_id, num_id_to_cat_id_map):
         segm_res.append(coco_res)
     return segm_res
 
+def get_keypoint_res_oadkpt(kpts, bboxes, bbox_nums, image_id, label_to_cat_id_map, bias=0, add_rad=False):
+    kpt_res = []
+    k = 0
+    for i in range(len(bbox_nums)):
+        cur_image_id = int(image_id[i][0])
+        det_nums = bbox_nums[i]
+        for j in range(det_nums):
+            dt = bboxes[k]
+            kpt = kpts[k]
+            kpt = kpt.flatten()
+            kpt = np.hstack((kpt.reshape(-1, 2), np.full((kpt.reshape(-1, 2).shape[0], 1), 2))).flatten()
+            k = k + 1
+            if add_rad:
+                num_id, score, xmin, ymin, xmax, ymax, rad = dt.tolist()
+            else:
+                num_id, score, xmin, ymin, xmax, ymax = dt.tolist()
+            if int(num_id) < 0:
+                continue
+            category_id = label_to_cat_id_map[int(num_id)]
+            w = xmax - xmin + bias
+            h = ymax - ymin + bias
+            bbox = [xmin, ymin, w, h]
+            if add_rad:
+                dt_res = {
+                    'image_id': cur_image_id,
+                    'category_id': category_id,
+                    'bbox': bbox,
+                    'score': score,
+                    'keypoints': kpt.tolist(),
+                    'rad': rad
+                }
+            else:
+                dt_res = {
+                    'image_id': cur_image_id,
+                    'category_id': category_id,
+                    'bbox': bbox,
+                    'score': score,
+                    'keypoints': kpt.tolist(),
+                }
+            kpt_res.append(dt_res)
+    return kpt_res
 
 def get_keypoint_res(results, im_id):
     anns = []
@@ -168,34 +244,6 @@ def get_keypoint_res(results, im_id):
             ann['area'] = (x1 - x0) * (y1 - y0)
             ann['bbox'] = [x0, y0, x1 - x0, y1 - y0]
             anns.append(ann)
-    return anns
-
-def get_keypoint_res_oadkpt(results, im_id):
-    anns = []
-    preds = results['keypoint']
-    bbox_score = results['bbox'][:,1]
-    for idx in range(im_id.shape[0]):
-        image_id = im_id[idx].item()
-        kpt = preds[idx]
-        score = bbox_score[idx]
-        # FIXME : category_id가 하나밖에 없다 = class는 한개만 적용한다.
-        kpt = kpt.flatten()
-        kpt = np.hstack((kpt.reshape(-1, 2), np.full((kpt.reshape(-1, 2).shape[0], 1), 2))).flatten()
-        ann = {
-                'image_id': image_id,
-                'category_id': 0,  # XXX hard code
-                'keypoints': kpt.tolist(),
-                'score': float(score)
-            }
-        
-        x = kpt[0::3]
-        y = kpt[1::3]
-        x0, x1, y0, y1 = np.min(x).item(), np.max(x).item(), np.min(y).item(
-        ), np.max(y).item()
-        ann['area'] = (x1 - x0) * (y1 - y0)
-        ann['bbox'] = [x0, y0, x1 - x0, y1 - y0]
-        anns.append(ann)
-        
     return anns
 
 def get_pose3d_res(results, im_id):
