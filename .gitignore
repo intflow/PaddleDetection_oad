@@ -87,3 +87,5 @@ kernel_meta/
 # MAC
 *.DS_Store
 
+# ONNX
+*.onnx
