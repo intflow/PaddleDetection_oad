@@ -28,6 +28,10 @@ logger = setup_logger(__name__)
 
 __all__ = ['visualize_results']
 
+def get_color(idx):
+    idx = idx * 3
+    color = ((37 * idx) % 255, (17 * idx) % 255, (29 * idx) % 255)
+    return color
 
 def visualize_results(image,
                       bbox_res,
@@ -244,7 +248,7 @@ def draw_pose(image,
         raise e
 
     skeletons = np.array([item['keypoints'] for item in results])
-    kpt_nums = 17
+    scores = np.array([item['score'] for item in results])
     if len(skeletons) > 0:
         kpt_nums = int(skeletons.shape[1] / 3)
     skeletons = skeletons.reshape(-1, kpt_nums, 3)
@@ -252,6 +256,8 @@ def draw_pose(image,
         EDGES = [(0, 1), (0, 2), (1, 3), (2, 4), (3, 5), (4, 6), (5, 7), (6, 8),
                  (7, 9), (8, 10), (5, 11), (6, 12), (11, 13), (12, 14),
                  (13, 15), (14, 16), (11, 12)]
+    elif kpt_nums == 3: 
+        EDGES = [(0, 1), (1, 2)]
     else:  #plot mpii keypoint
         EDGES = [(0, 1), (1, 2), (3, 4), (4, 5), (2, 6), (3, 6), (6, 7), (7, 8),
                  (8, 9), (10, 11), (11, 12), (13, 14), (14, 15), (8, 12),
@@ -279,7 +285,7 @@ def draw_pose(image,
     canvas = img.copy()
     for i in range(kpt_nums):
         for j in range(len(skeletons)):
-            if skeletons[j][i, 2] < visual_thread:
+            if scores[j] < visual_thread:
                 continue
             if ids is None:
                 color = colors[i] if color_set is None else colors[color_set[j]
@@ -303,8 +309,8 @@ def draw_pose(image,
     for i in range(NUM_EDGES):
         for j in range(len(skeletons)):
             edge = EDGES[i]
-            if skeletons[j][edge[0], 2] < visual_thread or skeletons[j][edge[
-                    1], 2] < visual_thread:
+            if (skeletons[j][edge[0], 2] < visual_thread or skeletons[j][edge[
+                    1], 2] < visual_thread) and scores[j] < visual_thread:
                 continue
 
             cur_canvas = canvas.copy()
