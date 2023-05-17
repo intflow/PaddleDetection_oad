@@ -4,8 +4,8 @@ num_kpts: 3
 
 TrainDataset:
   name: OADDataSet
-  image_dir: train/image
-  anno_path: train/json/annotation.json
+  image_dir: val/image
+  anno_path: val/json/annotation.json
   dataset_dir: /DL_data_super_ssd/EFID2023/new_hallway
   data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd','gt_keypoint','gt_rad']
 

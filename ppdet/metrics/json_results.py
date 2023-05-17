@@ -191,14 +191,17 @@ def get_keypoint_res_oadkpt(kpts, bboxes, bbox_nums, image_id, label_to_cat_id_m
             dt = bboxes[k]
             kpt = kpts[k]
             kpt = kpt.flatten()
-            kpt = np.hstack((kpt.reshape(-1, 2), np.full((kpt.reshape(-1, 2).shape[0], 1), 2))).flatten()
             k = k + 1
+            
             if add_rad:
                 num_id, score, xmin, ymin, xmax, ymax, rad = dt.tolist()
             else:
                 num_id, score, xmin, ymin, xmax, ymax = dt.tolist()
             if int(num_id) < 0:
                 continue
+
+            kpt = np.hstack((kpt.reshape(-1, 2), np.full((kpt.reshape(-1, 2).shape[0], 1), score))).flatten()
+
             category_id = label_to_cat_id_map[int(num_id)]
             w = xmax - xmin + bias
             h = ymax - ymin + bias
